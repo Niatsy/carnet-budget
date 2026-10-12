@@ -1,6 +1,6 @@
 // Garde l'appli sur l'appareil pour qu'elle s'ouvre sans réseau.
 // Change VERSION à chaque mise à jour de l'appli pour que les appareils récupèrent la nouvelle.
-const VERSION = "carnet-v1";
+const VERSION = "carnet-v2";
 const SHELL = ["./", "index.html", "config.js", "store.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
