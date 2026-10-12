@@ -35,3 +35,6 @@ create policy "items_select_own" on public.items for select to authenticated usi
 create policy "items_insert_own" on public.items for insert to authenticated with check (user_id = auth.uid());
 create policy "items_update_own" on public.items for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "items_delete_own" on public.items for delete to authenticated using (user_id = auth.uid());
+
+-- Autorise les comptes connectés à utiliser la table (nécessaire si « Automatically expose new tables » est décoché).
+grant select, insert, update, delete on public.items to authenticated;
