@@ -6,4 +6,7 @@
 window.CARNET_CONFIG = {
   supabaseUrl: "https://fxnlboaaexiucpjgadpw.supabase.co",
   supabaseAnonKey: "sb_publishable_BsyNao1AxQzHo0OjMhFslQ_AId9NTCq",
+  // Affichés dans la politique de confidentialité
+  editor: "Niatsy",
+  contactEmail: "",
 };

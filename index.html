@@ -13,10 +13,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Budget">
 <title>Carnet de budget</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Police hébergée dans l'appli : aucune requête vers Google (RGPD) */
+@font-face { font-family: "Figtree"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("fonts/figtree-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Figtree"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("fonts/figtree-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 /* Base (ce que la page publiée sur claude.ai recevait automatiquement) */
 [hidden] { display: none !important; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -374,7 +375,29 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .syncchip[data-s="syncing"] i { background: var(--sun-deep); }
 .syncchip[data-s="offline"] i, .syncchip[data-s="local"] i { background: var(--ink-2); }
 .syncchip[data-s="error"] i, .syncchip[data-s="signedout"] i { background: var(--bad); }
-.auth-err { color: var(--bad); font-weight: 600; min-height: 1.4em; }
+.auth-err { color: var(--bad); font-weight: 600; min-height: 1.4em; margin: 0; }
+.auth-err.info { color: var(--ok); }
+.auth-input { width: 100%; padding: 10px 13px; border: 1.5px solid var(--mist); border-radius: 12px; background: var(--cloud); }
+.pass-box { position: relative; }
+.pass-box .auth-input { padding-right: 92px; }
+.pass-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: var(--cloud-2); border-radius: 9px; padding: 6px 10px; font-weight: 700; font-size: 0.8rem; color: var(--ink); }
+.pw-check { display: grid; gap: 8px; }
+.pw-meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.pw-meter i { height: 6px; border-radius: 9px; background: var(--cloud-2); }
+.pw-meter[data-l="1"] i:nth-child(-n+1) { background: var(--bad); }
+.pw-meter[data-l="2"] i:nth-child(-n+2) { background: var(--sun-deep); }
+.pw-meter[data-l="3"] i:nth-child(-n+3) { background: var(--sky-2); }
+.pw-meter[data-l="4"] i { background: var(--ok); }
+.pw-check ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.pw-check li { font-size: 0.8rem; font-weight: 600; color: var(--ink-2); background: var(--cloud-2); border-radius: 99px; padding: 3px 10px; }
+.pw-check li.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--cloud)); }
+.pw-check li.ok::before { content: ""; display: inline-block; width: 7px; height: 4px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg) translateY(-2px); margin-right: 6px; }
+#auth-submit { margin-left: auto; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 0.88rem; line-height: 1.4; }
+.consent input { width: 20px; height: 20px; margin-top: 1px; flex: none; }
+.danger-zone { display: grid; gap: 8px; }
+.btn-danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--mist)); }
+.btn-danger.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
 .data-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .top-right { display: flex; gap: 8px; align-items: center; }
 @media (max-width: 480px) {
@@ -418,18 +441,38 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <section id="view-auth" class="centered panel capped" hidden>
     <svg class="cap" preserveAspectRatio="none"><use href="#cloud-cap"/></svg>
     <div style="display:grid;gap:6px">
-      <h1 style="font-size:1.8rem;line-height:1.15">Connecte&#8209;toi à ton carnet</h1>
-      <p class="muted">Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.</p>
+      <h1 style="font-size:1.8rem;line-height:1.15" id="auth-title">Connecte&#8209;toi à ton carnet</h1>
+      <p class="muted" id="auth-lead">Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.</p>
     </div>
-    <form id="auth-form" class="form-grid">
-      <label class="field full"><span>Adresse e-mail</span><input type="email" id="auth-email" autocomplete="email" required style="width:100%;padding:10px 13px;border:1.5px solid var(--mist);border-radius:12px"></label>
-      <label class="field full"><span>Mot de passe</span><input type="password" id="auth-pass" autocomplete="current-password" minlength="6" required style="width:100%;padding:10px 13px;border:1.5px solid var(--mist);border-radius:12px"><small>6 caractères minimum.</small></label>
+    <div class="seg" id="auth-tabs" role="group" aria-label="Connexion ou création de compte" style="grid-template-columns:1fr 1fr">
+      <button type="button" data-mode="in" aria-pressed="true">Se connecter</button>
+      <button type="button" data-mode="up" aria-pressed="false">Créer un compte</button>
+    </div>
+    <form id="auth-form" class="form-grid" novalidate>
+      <label class="field full" id="auth-email-wrap"><span>Adresse e-mail</span><input type="email" id="auth-email" autocomplete="email" required class="auth-input"></label>
+      <div class="field full" id="auth-pass-wrap">
+        <label for="auth-pass"><span id="auth-pass-label" style="font-size:0.86rem;font-weight:700">Mot de passe</span></label>
+        <div class="pass-box"><input type="password" id="auth-pass" autocomplete="current-password" required class="auth-input"><button type="button" class="pass-eye" id="auth-eye" aria-label="Afficher le mot de passe" aria-pressed="false">Afficher</button></div>
+      </div>
+      <div class="full pw-check" id="auth-rules" hidden>
+        <div class="pw-meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <ul>
+          <li data-r="len">12 caractères minimum</li>
+          <li data-r="low">une minuscule</li>
+          <li data-r="up">une majuscule</li>
+          <li data-r="dig">un chiffre</li>
+          <li data-r="sym">un caractère spécial (! ? @ # …)</li>
+        </ul>
+      </div>
+      <label class="field full" id="auth-pass2-wrap" hidden><span>Confirme le mot de passe</span><input type="password" id="auth-pass2" autocomplete="new-password" class="auth-input"></label>
+      <label class="full consent" id="auth-consent-wrap" hidden><input type="checkbox" id="auth-consent"> <span>J'ai lu la <a href="confidentialite.html">politique de confidentialité</a> et j'accepte que mes données soient traitées pour faire fonctionner le carnet.</span></label>
       <p class="auth-err full" id="auth-err" aria-live="polite"></p>
-      <div class="full actions">
-        <button class="btn" type="button" id="auth-signup">Créer mon compte</button>
-        <button class="btn btn-sun" type="submit" id="auth-signin">Se connecter</button>
+      <div class="full actions" style="justify-content:space-between;align-items:center">
+        <button class="linkbtn" type="button" id="auth-forgot">Mot de passe oublié ?</button>
+        <button class="btn btn-sun" type="submit" id="auth-submit">Se connecter</button>
       </div>
     </form>
+    <p style="font-size:0.85rem;margin:0"><a href="confidentialite.html">Confidentialité et mentions légales</a></p>
   </section>
 
   <!-- Première ouverture -->
@@ -531,7 +574,12 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
           <input type="file" id="import-file" accept="application/json,.json" hidden>
           <button class="btn btn-ghost" type="button" id="sign-out" hidden>Se déconnecter</button>
         </div>
-        <p class="muted" style="font-size:0.85rem">L'import ajoute les opérations du fichier à ton carnet : pratique pour récupérer celles de la version claude.ai.</p>
+        <p class="muted" style="font-size:0.85rem">L'import ajoute les opérations du fichier à ton carnet : pratique pour récupérer celles de la version claude.ai. Se déconnecter efface aussi les données gardées sur cet appareil (elles restent dans ton compte).</p>
+        <p style="font-size:0.88rem;margin:0"><a href="confidentialite.html">Confidentialité et mentions légales</a></p>
+        <div class="danger-zone" id="delete-zone" hidden>
+          <p class="muted" style="font-size:0.85rem">Supprimer ton compte efface définitivement ton compte et toutes tes données, sur le serveur et sur cet appareil. Exporte-les d'abord si tu veux les garder.</p>
+          <div><button class="btn btn-danger" type="button" id="delete-account">Supprimer mon compte et mes données</button></div>
+        </div>
       </div>
       <div class="actions"><button class="btn btn-sun" id="save-settings">Enregistrer les réglages</button></div>
     </section>
@@ -740,7 +788,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   let started = false;
   function boot() {
     // Avec la synchronisation activée, il faut un compte ; sinon le carnet reste sur cet appareil.
-    if (S.syncEnabled && !S.session) { show("auth"); return; }
+    if (S.syncEnabled && !S.session) {
+      show("auth");
+      if (S.linkError) setAuthMode("in", S.linkError === "otp_expired" ? "Ce lien a expiré. Demande-en un nouveau." : "Ce lien n'est plus valable. Reconnecte-toi.");
+      else setAuthMode(authMode);
+      return;
+    }
+    if (S.syncEnabled && S.linkType === "recovery") { show("auth"); setAuthMode("reset"); return; }
     if (started) return;
     started = true;
     profileRef = S.profileRef;
@@ -754,30 +808,100 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   }
 
   // ---------- Connexion ----------
+  // Règles de mot de passe recommandées par la CNIL (12 caractères, 4 types de caractères).
+  const PW_RULES = {
+    len: (p) => p.length >= 12,
+    low: (p) => /[a-zà-ÿ]/.test(p),
+    up: (p) => /[A-ZÀ-Þ]/.test(p),
+    dig: (p) => /\d/.test(p),
+    sym: (p) => /[^A-Za-z0-9À-ÿ\s]/.test(p),
+  };
+  const pwOk = (p) => Object.values(PW_RULES).every((f) => f(p));
+  function paintRules() {
+    const p = $("#auth-pass").value;
+    let n = 0;
+    document.querySelectorAll("#auth-rules li").forEach((li) => { const ok = PW_RULES[li.dataset.r](p); li.classList.toggle("ok", ok); if (ok) n++; });
+    $(".pw-meter").dataset.l = p ? String(n >= 5 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : 1) : "0";
+  }
+  let authMode = "in";
+  const AUTH_UI = {
+    in: { title: "Connecte&#8209;toi à ton carnet", lead: "Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.", submit: "Se connecter", passLabel: "Mot de passe", ac: "current-password" },
+    up: { title: "Crée ton compte", lead: "Choisis un mot de passe solide : il protège tes données financières.", submit: "Créer mon compte", passLabel: "Mot de passe", ac: "new-password" },
+    forgot: { title: "Mot de passe oublié", lead: "Indique ton adresse : tu recevras un lien pour choisir un nouveau mot de passe.", submit: "Recevoir le lien", passLabel: "", ac: "" },
+    reset: { title: "Nouveau mot de passe", lead: "Choisis ton nouveau mot de passe.", submit: "Enregistrer le mot de passe", passLabel: "Nouveau mot de passe", ac: "new-password" },
+  };
+  function setAuthMode(m, msg, isInfo) {
+    authMode = m;
+    const ui = AUTH_UI[m];
+    $("#auth-title").innerHTML = ui.title;
+    $("#auth-lead").textContent = ui.lead;
+    $("#auth-submit").textContent = ui.submit;
+    $("#auth-tabs").hidden = !(m === "in" || m === "up");
+    document.querySelectorAll("#auth-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+    $("#auth-email-wrap").hidden = m === "reset";
+    $("#auth-pass-wrap").hidden = m === "forgot";
+    $("#auth-pass-label").textContent = ui.passLabel;
+    $("#auth-pass").setAttribute("autocomplete", ui.ac || "off");
+    const strong = m === "up" || m === "reset";
+    $("#auth-rules").hidden = !strong;
+    $("#auth-pass2-wrap").hidden = !strong;
+    $("#auth-consent-wrap").hidden = m !== "up";
+    $("#auth-forgot").textContent = m === "forgot" ? "Retour à la connexion" : "Mot de passe oublié ?";
+    $("#auth-forgot").hidden = m === "up" || m === "reset";
+    const err = $("#auth-err"); err.textContent = msg || ""; err.classList.toggle("info", !!isInfo);
+    paintRules();
+  }
   function authError(e) {
-    const m = String((e && e.message) || "");
-    if (/invalid login|invalid_credentials/i.test(m + (e && e.code))) return "E-mail ou mot de passe incorrect.";
-    if (/already registered|user_already_exists/i.test(m + (e && e.code))) return "Un compte existe déjà avec cet e-mail : utilise « Se connecter ».";
-    if (/email not confirmed/i.test(m)) return "Confirme d'abord ton adresse : clique sur le lien reçu par e-mail.";
-    if (!navigator.onLine) return "Pas de réseau : la première connexion a besoin d'internet.";
-    return "La connexion a échoué : " + m;
+    const m = String((e && e.message) || "") + " " + String((e && e.code) || "");
+    if (/invalid login|invalid_credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
+    if (/already registered|user_already_exists/i.test(m)) return "Un compte existe déjà avec cet e-mail : utilise « Se connecter ».";
+    if (/email not confirmed|email_not_confirmed/i.test(m)) return "Confirme d'abord ton adresse : clique sur le lien reçu par e-mail.";
+    if (/weak_password|password should/i.test(m)) return "Mot de passe refusé par le serveur : il est trop faible.";
+    if (/same_password/i.test(m)) return "Choisis un mot de passe différent de l'ancien.";
+    if (/rate limit|over_email_send_rate_limit|429/i.test(m)) return "Trop de tentatives. Patiente quelques minutes puis réessaie.";
+    if (!navigator.onLine) return "Pas de réseau : cette étape a besoin d'internet.";
+    return "L'opération a échoué. Réessaie dans un instant.";
   }
-  async function doAuth(kind) {
-    const email = $("#auth-email").value.trim(), pass = $("#auth-pass").value;
-    if (!email || pass.length < 6) { $("#auth-err").textContent = "Indique ton e-mail et un mot de passe d'au moins 6 caractères."; return; }
-    $("#auth-err").textContent = "";
-    const btns = [$("#auth-signin"), $("#auth-signup")]; btns.forEach((b) => (b.disabled = true));
+  async function doAuth() {
+    const email = $("#auth-email").value.trim(), pass = $("#auth-pass").value, pass2 = $("#auth-pass2").value;
+    const say = (t, info) => { const e = $("#auth-err"); e.textContent = t; e.classList.toggle("info", !!info); };
+    if (authMode !== "reset" && !/^\S+@\S+\.\S+$/.test(email)) return say("Indique une adresse e-mail valide.");
+    if (authMode === "in" && !pass) return say("Indique ton mot de passe.");
+    if (authMode === "up" || authMode === "reset") {
+      if (!pwOk(pass)) return say("Ton mot de passe doit respecter les 5 règles ci-dessus.");
+      if (pass !== pass2) return say("Les deux mots de passe ne sont pas identiques.");
+    }
+    if (authMode === "up" && !$("#auth-consent").checked) return say("Coche la case pour accepter la politique de confidentialité.");
+    say("");
+    const btn = $("#auth-submit"); btn.disabled = true;
     try {
-      if (kind === "up") {
+      if (authMode === "in") { await S.signIn(email, pass); boot(); }
+      else if (authMode === "up") {
         const r = await S.signUp(email, pass);
-        if (r === "confirm") { $("#auth-err").textContent = "Compte créé. Ouvre l'e-mail de confirmation, puis reviens te connecter."; return; }
-      } else await S.signIn(email, pass);
-      boot();
-    } catch (e) { $("#auth-err").textContent = authError(e); }
-    finally { btns.forEach((b) => (b.disabled = false)); }
+        if (r === "confirm") { setAuthMode("in", "Compte créé. Ouvre l'e-mail de confirmation : le lien te connectera directement.", true); $("#auth-pass").value = ""; }
+        else boot();
+      } else if (authMode === "forgot") {
+        await S.recover(email);
+        setAuthMode("in", "Si un compte existe avec cette adresse, un e-mail vient de partir. Ouvre le lien qu'il contient.", true);
+      } else if (authMode === "reset") {
+        await S.updatePassword(pass);
+        $("#auth-pass").value = ""; $("#auth-pass2").value = "";
+        boot(); toast("Mot de passe modifié.");
+      }
+    } catch (e) { say(authError(e)); }
+    finally { btn.disabled = false; }
   }
-  $("#auth-form").addEventListener("submit", (e) => { e.preventDefault(); doAuth("in"); });
-  $("#auth-signup").addEventListener("click", () => doAuth("up"));
+  $("#auth-form").addEventListener("submit", (e) => { e.preventDefault(); doAuth(); });
+  document.querySelectorAll("#auth-tabs button").forEach((b) => b.addEventListener("click", () => setAuthMode(b.dataset.mode)));
+  $("#auth-forgot").addEventListener("click", () => setAuthMode(authMode === "forgot" ? "in" : "forgot"));
+  $("#auth-pass").addEventListener("input", paintRules);
+  $("#auth-eye").addEventListener("click", () => {
+    const show = $("#auth-pass").type === "password";
+    $("#auth-pass").type = show ? "text" : "password"; $("#auth-pass2").type = show ? "text" : "password";
+    $("#auth-eye").textContent = show ? "Masquer" : "Afficher";
+    $("#auth-eye").setAttribute("aria-pressed", String(show));
+    $("#auth-eye").setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+  });
 
   // ---------- État de la synchronisation ----------
   const SYNC_TXT = { local: "Sur cet appareil", idle: "Prêt", syncing: "Synchro…", synced: "Synchronisé", offline: "Hors ligne", error: "Synchro en attente", signedout: "Reconnecte-toi" };
@@ -795,6 +919,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (!S.syncEnabled) a.textContent = "Synchronisation désactivée : tes données restent sur cet appareil. Pense à exporter de temps en temps.";
     else a.textContent = S.session ? `Connecté avec ${S.session.user.email}. Tes données se synchronisent entre tes appareils.` : "";
     $("#sign-out").hidden = !(S.syncEnabled && S.session);
+    $("#delete-zone").hidden = !(S.syncEnabled && S.session);
   }
   $("#export-data").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(S.exportData(), null, 2)], { type: "application/json" });
@@ -811,7 +936,24 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     try { const n = S.importData(JSON.parse(await f.text())); toast(`${n} opération${n > 1 ? "s" : ""} importée${n > 1 ? "s" : ""}.`); closeSettings(); }
     catch (err) { toast(err.message && err.message.startsWith("Ce fichier") ? err.message : "Ce fichier n'a pas pu être lu."); }
   });
-  $("#sign-out").addEventListener("click", () => { S.signOut(); });
+  $("#sign-out").addEventListener("click", async () => {
+    if (S.hasPending && !navigator.onLine) { toast("Des saisies ne sont pas encore synchronisées : reconnecte-toi à internet avant de te déconnecter."); return; }
+    $("#sign-out").disabled = true;
+    await S.signOut();
+  });
+  // Suppression du compte : deux clics, le second dans les 5 secondes.
+  $("#delete-account").addEventListener("click", async (e) => {
+    const b = e.currentTarget;
+    if (!navigator.onLine) { toast("La suppression du compte a besoin d'internet."); return; }
+    if (!b.classList.contains("armed")) {
+      b.classList.add("armed"); b.textContent = "Confirmer la suppression définitive";
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Supprimer mon compte et mes données"; } }, 5000);
+      return;
+    }
+    b.disabled = true; b.textContent = "Suppression…";
+    try { await S.deleteAccount(); }
+    catch (err) { toast("La suppression a échoué. Réessaie plus tard."); b.disabled = false; b.classList.remove("armed"); b.textContent = "Supprimer mon compte et mes données"; }
+  });
 
   // ---------- Montants mensuels automatiques ----------
   // Chaque occurrence a un identifiant fixe (rec_<id>_<mois>) : l'ajouter deux fois, même depuis deux appareils, ne crée pas de doublon.
@@ -1429,7 +1571,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   $("#close-settings").addEventListener("click", closeSettings);
 
   setType("depense");
-  boot();
+  S.ready.then(boot);
 
   // Fonctionnement hors connexion
   if ("serviceWorker" in navigator && location.protocol !== "file:") {

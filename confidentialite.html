@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a56c2">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Confidentialité · Carnet de budget</title>
+<style>
+@font-face { font-family: "Figtree"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("fonts/figtree-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Figtree"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("fonts/figtree-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+:root { color-scheme: light; --sky-1: #1a56c2; --sky-2: #2a6fd0; --sky-4: #a9d6ff; --cloud: #ffffff; --cloud-2: #eef5ff; --ink: #13284f; --ink-2: #4a5f86; --sun: #ffcf3f; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+* { box-sizing: border-box; }
+html { background: var(--sky-2); }
+body { margin: 0; padding-inline: 16px; padding-block: 24px 48px; font-family: "Figtree", "Segoe UI", system-ui, sans-serif; color: var(--ink); line-height: 1.6; font-size: 16px;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 40%, var(--sky-4) 100%) fixed; min-height: 100vh; }
+main { max-width: 760px; margin: 0 auto; background: var(--cloud); border-radius: 26px; padding: clamp(20px, 5vw, 40px); box-shadow: 0 18px 40px -18px rgba(13, 40, 90, 0.5); }
+h1 { font-size: clamp(1.7rem, 5vw, 2.2rem); line-height: 1.15; margin: 0 0 6px; font-weight: 800; letter-spacing: -0.015em; text-wrap: balance; }
+h2 { font-size: 1.2rem; margin: 30px 0 6px; font-weight: 800; }
+p, li { max-width: 68ch; }
+p { margin: 0 0 10px; }
+ul { margin: 0 0 10px; padding-left: 1.2em; }
+li { margin-bottom: 4px; }
+a { color: var(--sky-1); text-underline-offset: 3px; font-weight: 600; }
+.muted { color: var(--ink-2); }
+.back { display: inline-flex; margin-bottom: 18px; background: var(--cloud); color: var(--ink); text-decoration: none; padding: 9px 16px; border-radius: 999px; font-weight: 700; box-shadow: 0 8px 20px -10px rgba(13, 40, 90, 0.45); }
+.box { background: var(--cloud-2); border-radius: 16px; padding: 14px 18px; margin: 10px 0; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div style="max-width:760px;margin:0 auto"><a class="back" href="./">← Retour au carnet</a></div>
+<main>
+  <h1>Confidentialité et mentions légales</h1>
+  <p class="muted">Dernière mise à jour : 12 octobre 2026</p>
+
+  <p>Le Carnet de budget est une application personnelle pour suivre ses revenus, ses dépenses et son épargne. Cette page explique, simplement, quelles données sont utilisées, pourquoi, où elles sont rangées et quels sont tes droits, conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés.</p>
+
+  <h2>Qui est responsable de tes données ?</h2>
+  <div class="box">
+    <p style="margin:0"><strong>Responsable du traitement et éditeur :</strong> <span data-cfg="editor">Niatsy</span><br>
+    <strong>Contact :</strong> <span data-cfg="contactEmail">adresse e-mail de contact</span></p>
+  </div>
+
+  <h2>Quelles données sont utilisées ?</h2>
+  <ul>
+    <li><strong>Ton adresse e-mail</strong>, pour créer ton compte et te connecter.</li>
+    <li><strong>Ton mot de passe</strong>, que nous ne voyons jamais : il est transformé de façon irréversible (haché) par notre prestataire Supabase avant d'être enregistré.</li>
+    <li><strong>Les informations que tu saisis</strong> : salaire, soldes, objectif d'épargne, catégories, opérations (montant, date, catégorie, libellé facultatif).</li>
+    <li><strong>Des données techniques</strong> : ton adresse IP et des informations de connexion apparaissent dans les journaux de sécurité des hébergeurs.</li>
+  </ul>
+  <p>Aucune donnée bancaire (numéro de compte, carte) n'est demandée. Aucun accès à ta banque n'est fait.</p>
+
+  <h2>Pourquoi ?</h2>
+  <p>Uniquement pour faire fonctionner le carnet : afficher ton budget, enregistrer tes saisies et les synchroniser entre tes appareils. Tes données ne sont ni vendues, ni louées, ni utilisées pour de la publicité ou du profilage.</p>
+  <p><strong>Base légale :</strong> l'exécution du service que tu demandes en créant ton compte (article 6.1.b du RGPD).</p>
+
+  <h2>Où sont-elles rangées, et qui y a accès ?</h2>
+  <ul>
+    <li><strong>Sur ton appareil</strong> : une copie est gardée dans la mémoire du navigateur pour que le carnet marche sans réseau. Elle est effacée quand tu te déconnectes.</li>
+    <li><strong>Supabase</strong> (Supabase Inc.) héberge ton compte et la copie synchronisée de tes données, sur des serveurs situés en Europe. Une règle de sécurité garantit que chaque compte ne peut lire que ses propres données.</li>
+    <li><strong>GitHub Pages</strong> (GitHub Inc., filiale de Microsoft, États-Unis) héberge les fichiers de l'application. Il ne reçoit pas tes données budgétaires, seulement les informations techniques de tes visites (dont l'adresse IP). GitHub est certifié au cadre de protection des données UE–États-Unis (Data Privacy Framework).</li>
+  </ul>
+  <p>Ces prestataires agissent comme sous-traitants, selon leurs conditions de traitement des données. Personne d'autre n'a accès à tes données.</p>
+
+  <h2>Combien de temps ?</h2>
+  <p>Tes données sont conservées tant que ton compte existe. Quand tu supprimes ton compte, ton compte et toutes tes données sont effacés immédiatement du serveur et de l'appareil utilisé. Les journaux techniques des hébergeurs sont conservés selon leurs propres durées, limitées.</p>
+
+  <h2>Cookies et traceurs</h2>
+  <p>Le carnet n'utilise <strong>aucun cookie publicitaire, aucun outil de mesure d'audience et aucun traceur</strong>. Il enregistre seulement, dans la mémoire de ton navigateur, ce qui est strictement nécessaire à son fonctionnement (ta session de connexion et la copie de tes données pour le mode hors ligne). Ces éléments sont dispensés de consentement : il n'y a donc pas de bandeau cookies. La police de caractères est hébergée avec l'application : aucune requête n'est envoyée à Google.</p>
+
+  <h2>Sécurité</h2>
+  <ul>
+    <li>Tous les échanges sont chiffrés (HTTPS).</li>
+    <li>Mot de passe robuste obligatoire, selon les recommandations de la CNIL : 12 caractères minimum, avec majuscules, minuscules, chiffres et caractères spéciaux.</li>
+    <li>Adresse e-mail confirmée avant la première connexion.</li>
+    <li>Cloisonnement des données par compte sur le serveur.</li>
+  </ul>
+
+  <h2>Tes droits</h2>
+  <p>Tu disposes des droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de tes données. Directement dans l'application :</p>
+  <ul>
+    <li><strong>Accès et portabilité</strong> : Réglages › Mes données › <em>Exporter mes données</em> (fichier lisible, réutilisable).</li>
+    <li><strong>Rectification</strong> : modifie ou supprime toute opération ou réglage à tout moment.</li>
+    <li><strong>Effacement</strong> : Réglages › Mes données › <em>Supprimer mon compte et mes données</em>.</li>
+  </ul>
+  <p>Pour toute autre demande, écris à l'adresse de contact ci-dessus : une réponse te sera apportée dans un délai d'un mois. Si tu estimes que tes droits ne sont pas respectés, tu peux adresser une réclamation à la CNIL : <a href="https://www.cnil.fr/fr/plaintes" rel="noopener">www.cnil.fr/fr/plaintes</a>.</p>
+
+  <h2>Mentions légales</h2>
+  <div class="box">
+    <p><strong>Éditeur :</strong> <span data-cfg="editor">Niatsy</span>, site personnel et non commercial. Contact : <span data-cfg="contactEmail">adresse e-mail de contact</span>.</p>
+    <p style="margin:0"><strong>Hébergeur de l'application :</strong> GitHub Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis — <a href="https://github.com" rel="noopener">github.com</a>.<br>
+    <strong>Hébergeur des données :</strong> Supabase Inc. — <a href="https://supabase.com" rel="noopener">supabase.com</a> (serveurs en Europe).</p>
+  </div>
+</main>
+<script src="config.js"></script>
+<script>
+  (function () {
+    var c = window.CARNET_CONFIG || {};
+    document.querySelectorAll("[data-cfg]").forEach(function (el) {
+      var v = c[el.getAttribute("data-cfg")];
+      if (!v) return;
+      if (el.getAttribute("data-cfg") === "contactEmail") { var a = document.createElement("a"); a.href = "mailto:" + v; a.textContent = v; el.replaceChildren(a); }
+      else el.textContent = v;
+    });
+  })();
+</script>
+</body>
+</html>

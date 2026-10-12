@@ -38,3 +38,17 @@ create policy "items_delete_own" on public.items for delete to authenticated usi
 
 -- Autorise les comptes connectés à utiliser la table (nécessaire si « Automatically expose new tables » est décoché).
 grant select, insert, update, delete on public.items to authenticated;
+
+-- Droit à l'effacement (RGPD) : la personne connectée peut supprimer son compte et toutes ses données.
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  delete from public.items where user_id = auth.uid();
+  delete from auth.users where id = auth.uid();
+end $$;
+
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

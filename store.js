@@ -86,6 +86,40 @@
     write("session", session);
     return true;
   }
+  // Les données locales appartiennent à un seul compte : si un autre compte se connecte sur l'appareil, on repart de zéro.
+  function claimDevice(uid) {
+    const owner = read("owner", null);
+    if (owner && owner !== uid) wipeLocal();
+    write("owner", uid);
+  }
+  function wipeLocal() {
+    items = {}; pending = {}; lastPull = null;
+    try { Object.keys(localStorage).filter((k) => k.startsWith(LS) && k !== LS + "session").forEach((k) => localStorage.removeItem(k)); } catch {}
+    emit();
+  }
+  async function getUser(accessToken) {
+    const r = await fetch(`${URL_}/auth/v1/user`, { headers: { apikey: KEY, Authorization: "Bearer " + accessToken } });
+    if (!r.ok) throw new Error("Lien expiré ou invalide.");
+    return r.json();
+  }
+  // Retour depuis un e-mail (confirmation d'inscription ou mot de passe oublié) : la session arrive dans l'adresse.
+  let linkType = null, linkError = null;
+  async function readLinkSession() {
+    if (!SYNC_ON || !location.hash || location.hash.length < 2) return;
+    const h = new URLSearchParams(location.hash.slice(1));
+    const clean = () => history.replaceState(null, "", location.pathname + location.search);
+    if (h.get("error")) { linkError = h.get("error_code") || h.get("error"); clean(); return; }
+    const at = h.get("access_token");
+    if (!at) return;
+    try {
+      const user = await getUser(at);
+      keepSession({ access_token: at, refresh_token: h.get("refresh_token"), expires_in: +h.get("expires_in") || 3600, user });
+      claimDevice(user.id);
+      linkType = h.get("type");
+    } catch (e) { linkError = "invalid"; }
+    clean();
+  }
+
   async function token() {
     if (!session) return null;
     if (Date.now() < session.expires_at - 60000) return session.access_token;
@@ -155,13 +189,44 @@
     get status() { return status; },
     onStatus(f) { statusListeners.add(f); f(status); return () => statusListeners.delete(f); },
     profileRef, txCol,
-    async signIn(email, password) { keepSession(await auth("token?grant_type=password", { email, password })); firstPullDone = false; setStatus("idle"); await sync(); },
+    get linkType() { return linkType; },
+    get linkError() { return linkError; },
+    get hasPending() { return Object.keys(pending).length > 0; },
+    async signIn(email, password) {
+      const j = await auth("token?grant_type=password", { email, password });
+      claimDevice(j.user.id); keepSession(j); firstPullDone = false; setStatus("idle"); await sync();
+    },
     async signUp(email, password) {
       const j = await auth("signup", { email, password });
-      if (keepSession(j)) { firstPullDone = false; await sync(); return "ok"; }
+      if (j.access_token) { claimDevice(j.user.id); keepSession(j); firstPullDone = false; await sync(); return "ok"; }
       return "confirm";
     },
-    signOut() { session = null; write("session", null); setStatus("signedout"); },
+    // Envoie l'e-mail « mot de passe oublié » ; le lien ramène sur l'appli.
+    async recover(email) {
+      const back = location.origin + location.pathname;
+      await auth("recover?redirect_to=" + encodeURIComponent(back), { email });
+    },
+    async updatePassword(password) {
+      const t = await token();
+      const r = await fetch(`${URL_}/auth/v1/user`, { method: "PUT", headers: { apikey: KEY, Authorization: "Bearer " + t, "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { const e = new Error(j.msg || j.message || j.error_description || "Échec"); e.code = j.error_code || j.code; throw e; }
+      linkType = null;
+    },
+    // Déconnexion : on envoie d'abord ce qui reste, puis on efface tout de l'appareil.
+    async signOut() {
+      if (Object.keys(pending).length && navigator.onLine) { try { await sync(); } catch {} }
+      session = null; write("session", null); wipeLocal(); write("owner", null);
+      setStatus("signedout");
+    },
+    // Droit à l'effacement : supprime le compte et toutes ses données sur le serveur, puis sur l'appareil.
+    async deleteAccount() {
+      const t = await token();
+      const r = await fetch(`${URL_}/rest/v1/rpc/delete_my_account`, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + t, "Content-Type": "application/json" }, body: "{}" });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.message || "Suppression impossible (" + r.status + ")"); }
+      session = null; write("session", null); wipeLocal(); write("owner", null);
+      setStatus("signedout");
+    },
     syncNow: () => scheduleSync(0),
     // Export / import : un fichier JSON lisible, au même format que le carnet claude.ai
     exportData() {
@@ -175,5 +240,5 @@
       return obj.tx.length;
     },
   };
-  if (session) scheduleSync(0);
+  window.CarnetStore.ready = readLinkSession().then(() => { if (session) scheduleSync(0); });
 })();
