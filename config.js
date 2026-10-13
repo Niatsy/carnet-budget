@@ -8,5 +8,5 @@ window.CARNET_CONFIG = {
   supabaseAnonKey: "sb_publishable_BsyNao1AxQzHo0OjMhFslQ_AId9NTCq",
   // Affichés dans la politique de confidentialité
   editor: "Niatsy",
-  contactEmail: "",
+  contactEmail: "niatsyy@gmail.com",
 };
