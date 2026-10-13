@@ -69,6 +69,7 @@ img { max-width: 100%; }
   --st-top: #d4dcea; --st-bot: #a7b4cb;
   --drift-top: #ffffff; --drift-bot: #e4f0ff;
   --hill-far: #8cc7b4;
+  --cl-shade: #7f98c2;
   --bench: #8a5a33; --lamp: #2c3b52; --lamp-light: #dfe9f2;
 }
 /* Jour : ciel clair, soleil, oiseaux. Le texte posé sur le ciel passe à l'encre. */
@@ -79,12 +80,8 @@ img { max-width: 100%; }
   --storm-note: #a8231a;
   --hill: #2f8a4c; --hill-2: #5cbf72; --hill-far: #9fd3bd;
 }
-/* Pendant le crépuscule (reste à vivre négatif), le ciel s'assombrit : texte de nouveau blanc */
-:root[data-theme="jour"] body.dusk {
-  --on-sky: #fff;
-  --on-sky-shade: 0 1px 2px rgba(10, 30, 70, 0.75), 0 0 10px rgba(10, 30, 70, 0.35);
-  --storm-note: #ffd9d4;
-}
+/* Le jour reste un ciel bleu, même quand le reste à vivre est négatif : le chiffre rouge suffit */
+:root[data-theme="jour"] body.dusk .sky::after { opacity: 0; }
 /* Nuit : ciel profond, lune, nuages sombres, panneaux de nuit et texte clair */
 :root[data-theme="nuit"] {
   color-scheme: dark;
@@ -103,6 +100,7 @@ img { max-width: 100%; }
   --drift-top: #3a4677; --drift-bot: #1c254d;
   --storm-note: #ffb3aa;
   --bench: #0b1226; --lamp: #0b1226; --lamp-light: #ffe7a0;
+  --cl-shade: #070b20;
 }
 
 * { box-sizing: border-box; }
@@ -175,10 +173,11 @@ body.dusk .sky-haze { background: linear-gradient(0deg, rgba(255, 214, 180, 0.4)
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.6s; }
 
 /* Lueur de soleil qui suit la souris (ordinateur) */
-.glow { position: fixed; left: -260px; top: -260px; width: 520px; height: 520px; border-radius: 50%; pointer-events: none; z-index: 14; opacity: 0; transition: opacity 0.4s ease; mix-blend-mode: screen;
-  background: radial-gradient(circle, rgba(255, 214, 90, 0.3) 0%, rgba(255, 196, 70, 0.12) 32%, rgba(255, 196, 70, 0) 64%); }
+/* Posée juste au-dessus du ciel et sous tout le contenu : elle éclaire le ciel, jamais le texte */
+.glow { position: fixed; left: -190px; top: -190px; width: 380px; height: 380px; border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.4s ease; mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(255, 220, 110, 0.78) 0%, rgba(255, 206, 80, 0.4) 26%, rgba(255, 196, 70, 0.1) 46%, rgba(255, 196, 70, 0) 66%); }
 .glow.on { opacity: 1; }
-:root[data-theme="nuit"] .glow { background: radial-gradient(circle, rgba(255, 210, 120, 0.22) 0%, rgba(255, 190, 90, 0.08) 34%, rgba(255, 190, 90, 0) 64%); }
+:root[data-theme="nuit"] .glow { background: radial-gradient(circle, rgba(255, 214, 130, 0.42) 0%, rgba(255, 196, 100, 0.18) 28%, rgba(255, 190, 90, 0.05) 48%, rgba(255, 190, 90, 0) 66%); }
 .flip { transform: scaleX(-1); transform-origin: center; transform-box: fill-box; }
 .sky svg, .cl > svg, .upcoming svg { overflow: visible; }
 @media (prefers-reduced-motion: no-preference) {
@@ -222,7 +221,7 @@ input:focus, select:focus { border-color: var(--sky-2); outline: none; box-shado
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .brand h1 { font-size: 1.7rem; color: var(--on-sky); }
 .monthnav { display: flex; align-items: center; gap: 2px; background: var(--cloud); border-radius: 999px; padding: 4px; box-shadow: var(--lift-sm); }
-.monthnav strong { font-family: var(--font-display); font-weight: 400; font-size: 1.08rem; min-width: 8.6em; text-align: center; text-transform: capitalize; }
+.monthnav strong { font-family: var(--font-display); font-weight: 400; font-size: 1.08rem; min-width: 8.6em; text-align: center; }
 .icon-btn { width: 36px; height: 36px; border-radius: 999px; border: 0; background: transparent; display: grid; place-items: center; padding: 0; color: var(--ink); }
 .icon-btn:hover { background: var(--cloud-2); }
 header .btn { box-shadow: var(--lift-sm); border-color: var(--cloud); }
@@ -258,17 +257,17 @@ header .btn { box-shadow: var(--lift-sm); border-color: var(--cloud); }
 .bar.ok > i { background: var(--ok); }
 
 /* Ton ciel du mois */
-.skyfield-head { text-align: center; }
-.skyfield-head h2 { color: var(--on-sky); font-size: 1.9rem; }
 .skysec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
 .field-sky { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 4px 10px; min-height: 120px; }
 .sky-row { display: flex; justify-content: center; align-items: flex-start; gap: 8px 14px; }
 /* Un nuage : sa surface est exactement proportionnelle au montant. */
 .cl { position: relative; flex: none; width: var(--w); display: grid; justify-items: center; gap: 4px; color: var(--ink); margin-top: var(--dy, 0); }
 .cl-shape { position: relative; width: var(--w); aspect-ratio: 200 / 150; display: grid; filter: drop-shadow(0 12px 12px rgba(13, 40, 90, 0.28)); }
-.cl-shape > svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: url(#cloudshade); overflow: visible; }
-.cl.storm .cl-shape > svg { fill: url(#stormshade); }
-.cl-txt { position: relative; align-self: end; justify-self: center; text-align: center; padding: 0 19% 10%; display: grid; gap: 0; justify-items: center; width: 100%; }
+.cl-shape > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cl-body { fill: var(--cl-fill, url(#cloudshade)); }
+.cl-crease { fill: none; stroke: var(--cl-shade); stroke-opacity: 0.22; stroke-width: 3.5; stroke-linecap: round; }
+.cl.storm { --cl-fill: url(#stormshade); }
+.cl-txt { position: relative; align-self: end; justify-self: center; text-align: center; padding: 0 21% 13%; display: grid; gap: 0; justify-items: center; width: 100%; }
 .cl-name { font-weight: 700; font-size: 0.9rem; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
 .cl-name i, .cl-pill i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--hue); margin-right: 5px; vertical-align: 1px; }
 .cl b { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.15rem, calc(var(--w) / 7), 2rem); line-height: 1.1; }
@@ -472,7 +471,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   header.top > .brand { flex-basis: 100%; }
   .brand h1 { font-size: 1.5rem; }
   .panel { padding: 18px; }
-  .skyfield-head h2 { font-size: 1.6rem; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .bar > i, .rule-bar > i, .cl-bar i { transition: width 0.4s ease; }
@@ -523,6 +521,14 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .theme-menu button[aria-pressed="true"] { background: var(--cloud-2); box-shadow: inset 0 0 0 1.5px var(--sky-2); }
 .theme-menu b { display: block; font-weight: 700; line-height: 1.25; }
 .theme-menu small { display: block; color: var(--ink-2); font-size: 0.78rem; font-weight: 600; }
+.theme-btn > b { font-weight: 800; font-size: 0.86rem; letter-spacing: 0.02em; }
+.lang-menu { width: 11em; }
+.lang-menu button > b:first-child { width: 22px; flex: none; font-size: 0.78rem; font-weight: 800; color: var(--ink-2); }
+/* Pages par semaine */
+.week-nav { display: flex; align-items: center; gap: 2px; background: var(--cloud-2); border-radius: 999px; padding: 4px; }
+.week-label { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 0.9rem; padding-inline: 4px; }
+.week-nav .icon-btn[disabled] { opacity: 0.3; cursor: default; background: transparent; }
+.week-toggle { margin-inline: 6px 10px; font-size: 0.84rem; white-space: nowrap; }
 /* Filtre des opérations par catégorie */
 .tx-filter { display: flex; flex-wrap: wrap; gap: 6px; }
 .fchip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--mist); background: var(--cloud); color: var(--ink-2); border-radius: 999px; padding: 5px 12px; font-size: 0.82rem; font-weight: 700; transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
@@ -549,6 +555,11 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 #edit-hint:empty { display: none; }
 @media (max-width: 480px) {
   .syncchip { padding: 13px; }
+  #lang-btn svg { display: none; }
+  .week-nav { flex-wrap: wrap; border-radius: 22px; }
+  .week-label { white-space: nowrap; font-size: 0.86rem; }
+  .week-toggle { flex-basis: 100%; text-align: center; margin: 0 0 6px; }
+  .week-toggle { margin-inline: 4px 8px; }
   .syncchip span, .theme-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .theme-btn { padding: 9px 11px; }
   .theme-menu { right: auto; left: 0; transform-origin: top left; }
@@ -571,6 +582,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -585,7 +597,24 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <!-- Deux autres silhouettes pour que le ciel ne répète pas le même nuage -->
   <symbol id="cloud-alt" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M22 124C8 124 0 114 3 102C5 91 15 85 27 87C23 69 37 55 55 59C58 37 80 25 100 33C110 9 144 3 160 23C176 15 196 29 192 49C200 58 202 76 195 87C203 97 201 117 187 122C183 124 179 124 174 124Z"/></symbol>
   <symbol id="cloud-flat" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M16 124C5 124 0 114 6 106C1 96 12 87 25 91C27 77 45 71 57 79C63 63 86 59 98 71C108 55 134 55 142 71C154 61 174 65 176 81C190 79 201 92 196 104C202 114 194 124 182 124Z"/></symbol>
+  <!-- Nuages « réels » : base plate, moutonnements en haut, plis légers ; le filtre puff donne le volume -->
+  <symbol id="cloud-a" viewBox="0 0 200 150"><g filter="url(#puff)"><path class="cl-body" d="M22 144C8 144 2 132 5 120C8 108 18 102 30 104C26 86 38 72 56 74C58 52 78 38 100 44C110 22 142 16 160 34C176 30 192 44 190 62C200 70 202 88 194 98C202 108 202 128 190 138C186 142 182 144 176 144Z"/><path class="cl-crease" filter="url(#soft)" d="M56 77C64 72 75 74 81 83M100 47C112 42 124 48 128 59M160 37C168 43 170 53 166 61M31 107C37 103 45 105 49 111"/></g></symbol>
+  <symbol id="cloud-b" viewBox="0 0 200 150"><g filter="url(#puff)"><path class="cl-body" d="M18 144C6 144 0 132 4 122C8 112 16 108 26 110C20 94 30 80 48 80C46 60 64 46 84 52C92 30 120 22 138 36C150 22 176 26 182 48C196 52 202 70 194 82C202 94 200 114 190 122C196 132 190 144 178 144Z"/><path class="cl-crease" filter="url(#soft)" d="M48 83C56 78 66 80 71 89M84 55C94 50 104 54 109 63M138 39C146 43 150 51 148 59M182 51C186 57 186 65 182 71"/></g></symbol>
   <defs>
+    <!-- Volume : bords légèrement irréguliers et ombre douce le long du bas de chaque moutonnement -->
+    <filter id="puff" x="-6%" y="-10%" width="112%" height="120%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="2" seed="11" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feGaussianBlur in="rough" stdDeviation="0.45" result="body"/>
+      <feOffset in="body" dy="-10" result="up"/>
+      <feComposite in="body" in2="up" operator="out" result="rim"/>
+      <feGaussianBlur in="rim" stdDeviation="5" result="rimSoft"/>
+      <feFlood style="flood-color:var(--cl-shade);flood-opacity:0.55" result="shadeColor"/>
+      <feComposite in="shadeColor" in2="rimSoft" operator="in" result="shade"/>
+      <feComposite in="shade" in2="body" operator="in" result="shadeIn"/>
+      <feMerge><feMergeNode in="body"/><feMergeNode in="shadeIn"/></feMerge>
+    </filter>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.6"/></filter>
     <!-- Les couleurs des nuages viennent du thème (variables CSS) -->
     <linearGradient id="cloudshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.5" style="stop-color:var(--cs-top)"/><stop offset="1" style="stop-color:var(--cs-bot)"/></linearGradient>
     <linearGradient id="driftshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" style="stop-color:var(--drift-top)"/><stop offset="1" style="stop-color:var(--drift-bot);stop-opacity:0.55"/></linearGradient>
@@ -631,7 +660,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <section id="view-auth" class="centered panel capped" hidden>
     <svg class="cap" preserveAspectRatio="none"><use href="#cloud-cap"/></svg>
     <div style="display:grid;gap:6px">
-      <h1 style="font-size:1.8rem;line-height:1.15" id="auth-title">Connecte&#8209;toi à ton carnet</h1>
+      <h1 style="font-size:1.8rem;line-height:1.15" id="auth-title">Connecte‑toi à ton carnet</h1>
       <p class="muted" id="auth-lead">Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.</p>
     </div>
     <div class="seg" id="auth-tabs" role="group" aria-label="Connexion ou création de compte" style="grid-template-columns:1fr 1fr">
@@ -717,6 +746,14 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
             <button type="button" data-t="nuit"><svg class="i"><use href="#i-moon"/></svg><span><b>Nuit</b><small>Lune et lampadaires</small></span></button>
           </div>
         </div>
+        <div class="theme-pick">
+          <button class="btn theme-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" title="Choisir la langue"><svg class="i"><use href="#i-globe"/></svg><b id="lang-label">FR</b></button>
+          <div class="theme-menu lang-menu" id="lang-menu" hidden>
+            <button type="button" data-l="fr" lang="fr"><b>FR</b><span><b>Français</b></span></button>
+            <button type="button" data-l="en" lang="en"><b>EN</b><span><b>English</b></span></button>
+            <button type="button" data-l="es" lang="es"><b>ES</b><span><b>Español</b></span></button>
+          </div>
+        </div>
         <button class="syncchip" id="sync-chip" type="button" title="Synchroniser maintenant"><i></i><span id="sync-label"></span></button>
         <button class="btn" id="toggle-settings" aria-expanded="false">Réglages</button>
       </div>
@@ -785,7 +822,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 
     <div class="hero">
       <section class="rav" aria-labelledby="rav-title">
-        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><path fill="url(#cloudshade)" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/></svg>
+        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><path filter="url(#puff)" class="cl-body" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/></svg>
         <div class="rav-body">
           <h2 class="rav-title" id="rav-title">Reste à vivre ce mois</h2>
           <span class="big num" id="rav"></span>
@@ -801,10 +838,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         </div>
       </section>
 
-      <section class="skysec" aria-labelledby="sky-title">
-        <div class="skyfield-head">
-          <h2 id="sky-title">Ton ciel du mois</h2>
-        </div>
+      <section class="skysec" aria-label="Ton ciel du mois">
         <div class="field-sky" id="cat-list"></div>
         <div class="sky-zero" id="sky-zero"></div>
       </section>
@@ -839,6 +873,12 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         <div class="top"><h2>Opérations du mois</h2><span class="muted num" id="tx-count"></span></div>
         <div class="tx-filter" id="tx-filter" role="group" aria-label="Filtrer par catégorie" hidden></div>
         <p class="muted" style="font-size:0.85rem" id="tx-help" hidden>Touche le crayon ou le montant pour modifier une opération.</p>
+        <div class="week-nav" id="week-nav" hidden>
+          <button class="icon-btn" id="week-prev" type="button" aria-label="Semaine précédente"><svg class="i"><use href="#i-left"/></svg></button>
+          <span class="week-label num" id="week-label" aria-live="polite"></span>
+          <button class="icon-btn" id="week-next" type="button" aria-label="Semaine suivante"><svg class="i"><use href="#i-right"/></svg></button>
+          <button class="linkbtn week-toggle" id="week-toggle" type="button">Tout le mois</button>
+        </div>
         <ul class="tx-list" id="tx-list"></ul>
       </section>
     </div>
@@ -923,10 +963,48 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 <div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button id="toast-action" type="button" hidden>Annuler</button></div>
 
 <script src="config.js"></script>
+<script src="i18n.js"></script>
 <script src="store.js"></script>
 <script>
 (function () {
   const $ = (s) => document.querySelector(s);
+  // ---------- Langue : français, anglais, espagnol ----------
+  const LOCALES = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
+  let lang = "fr";
+  try { lang = localStorage.getItem("carnet.lang") || ((navigator.language || "").slice(0, 2) === "en" ? "en" : (navigator.language || "").slice(0, 2) === "es" ? "es" : "fr"); } catch {}
+  if (!LOCALES[lang]) lang = "fr";
+  const LOC = () => LOCALES[lang];
+  // tr("texte français", { x: … }) : le texte dans la langue choisie
+  function tr(fr, v) {
+    const d = lang === "fr" ? null : window.I18N[lang];
+    let out = (d && d[window.I18N.norm(fr)]) || fr;
+    if (v) out = out.replace(/\{(\w+)\}/g, (_, k) => (v[k] ?? ""));
+    return out;
+  }
+  const plural = (n, one, many) => tr(n > 1 ? many : one, { n });
+  // Textes fixes de la page : on retient le français d'origine pour pouvoir changer de langue à tout moment
+  const STATIC = [];
+  (function collect() {
+    const ok = (t) => window.I18N.en[window.I18N.norm(t)] !== undefined;
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) if (n.parentElement.closest("script, style, svg") === null && ok(n.nodeValue)) STATIC.push({ n, fr: n.nodeValue });
+    for (const el of document.querySelectorAll("[placeholder], [aria-label], [title]"))
+      for (const a of ["placeholder", "aria-label", "title"]) if (el.hasAttribute(a) && ok(el.getAttribute(a))) STATIC.push({ el, a, fr: el.getAttribute(a) });
+  })();
+  function translateStatic() {
+    for (const s of STATIC) {
+      const keep = s.fr.match(/^\s*/)[0], tail = s.fr.match(/\s*$/)[0];
+      if (s.n) s.n.nodeValue = keep + tr(s.fr.trim()) + tail;
+      else s.el.setAttribute(s.a, tr(s.fr));
+    }
+    document.documentElement.lang = lang;
+    document.title = tr("Carnet de budget");
+  }
+  // Noms par défaut (catégories, « Salaire ») : affichés dans la langue choisie tant que l'utilisateur ne les a pas renommés
+  const DEFAULT_NAMES = new Set(["Logement", "Courses", "Transport", "Factures et abonnements", "Santé", "Loisirs", "Restaurants et sorties", "Shopping", "Autre", "Salaire"]);
+  const nameOf = (s) => (DEFAULT_NAMES.has(s) ? tr(s) : s);
+  // À l'enregistrement, un nom par défaut traduit redevient la clé française
+  const nameToStore = (s) => { for (const fr of DEFAULT_NAMES) if (tr(fr) === s) return fr; return s; };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const pad = (n) => String(n).padStart(2, "0");
   const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
@@ -934,7 +1012,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   const curMonth = () => monthOf(todayISO());
   const shiftMonth = (ym, delta) => { const [y, m] = ym.split("-").map(Number); const d = new Date(y, m - 1 + delta, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
   const daysIn = (ym) => { const [y, m] = ym.split("-").map(Number); return new Date(y, m, 0).getDate(); };
-  const monthLabel = (ym) => { const [y, m] = ym.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }); };
+  // Seule la première lettre en majuscule : « Octubre de 2026 », pas « Octubre De 2026 »
+  const monthLabel = (ym) => { const [y, m] = ym.split("-").map(Number); const s = new Date(y, m - 1, 1).toLocaleDateString(LOC(), { month: "long", year: "numeric" }); return s.charAt(0).toUpperCase() + s.slice(1); };
   const clampDay = (v) => Math.min(31, Math.max(1, parseInt(v, 10) || 1));
   const newId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -950,13 +1029,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   const fmtCache = {};
   function fmt(opts = {}) {
     const cur = (profile && profile.currency) || "EUR";
-    const key = cur + (opts.sign ? "s" : "");
-    if (!fmtCache[key]) fmtCache[key] = new Intl.NumberFormat("fr-FR", { style: "currency", currency: cur, signDisplay: opts.sign ? "exceptZero" : "auto", maximumFractionDigits: cur === "XOF" ? 0 : 2 });
+    const key = lang + cur + (opts.sign ? "s" : "");
+    if (!fmtCache[key]) fmtCache[key] = new Intl.NumberFormat(LOC(), { style: "currency", currency: cur, signDisplay: opts.sign ? "exceptZero" : "auto", maximumFractionDigits: cur === "XOF" ? 0 : 2 });
     return fmtCache[key];
   }
   const money = (cents, opts) => fmt(opts).format((cents || 0) / 100);
   const curSymbol = () => (fmt().formatToParts(0).find((p) => p.type === "currency") || {}).value || "";
-  const toInput = (cents) => (cents ? String((cents / 100).toFixed(2)).replace(".", ",").replace(",00", "") : "");
+  const toInput = (cents) => (cents ? String((cents / 100).toFixed(2)).replace(".00", "").replace(".", lang === "en" ? "." : ",") : "");
 
   const DEFAULT_CATS = [
     ["logement", "Logement", "besoin"], ["courses", "Courses", "besoin"], ["transport", "Transport", "besoin"],
@@ -974,10 +1053,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     return WHEEL[i % WHEEL.length];
   }
   function dayLabel(iso) {
-    if (iso === todayISO()) return "Aujourd'hui";
+    if (iso === todayISO()) return tr("Aujourd'hui");
     const y = new Date(); y.setDate(y.getDate() - 1);
-    if (iso === `${y.getFullYear()}-${pad(y.getMonth() + 1)}-${pad(y.getDate())}`) return "Hier";
-    const s = new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    if (iso === `${y.getFullYear()}-${pad(y.getMonth() + 1)}-${pad(y.getDate())}`) return tr("Hier");
+    const s = new Date(iso + "T12:00:00").toLocaleDateString(LOC(), { weekday: "long", day: "numeric", month: "long" });
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   const TRASH = '<svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>';
@@ -985,8 +1064,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // Filtre de la liste : une catégorie de dépense (« c:courses »), les revenus ou l'épargne
   const groupOf = (x) => x.type === "depense" ? "c:" + (x.cat || "") : x.type;
   const rankOf = (g, catRank) => g in catRank ? catRank[g] : g === "revenu" ? 900 : g === "epargne" ? 901 : 800;
-  const TYPE_LABEL = { depense: "Dépense", revenu: "Revenu", epargne: "Épargne" };
-  const ADDED = { depense: "Dépense ajoutée", revenu: "Revenu ajouté", epargne: "Épargne ajoutée" };
+  const TYPE_FR = { depense: "Dépense", revenu: "Revenu", epargne: "Épargne" };
+  const TYPE_LABEL = new Proxy(TYPE_FR, { get: (o, k) => tr(o[k]) });
+  const ADDED_FR = { depense: "Dépense ajoutée", revenu: "Revenu ajouté", epargne: "Épargne ajoutée" };
+  const ADDED = new Proxy(ADDED_FR, { get: (o, k) => tr(o[k]) });
 
   let db = null, profileRef = null, txCol = null;
   let profile = null, profileLoaded = false, txs = [], txsDefinitive = false;
@@ -996,6 +1077,34 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   let freshId = null;
 
   const live = () => txs.filter((x) => !x.skipped);
+  // Semaines : lundi de la semaine (AAAA-MM-JJ) et numéro ISO 8601, celui des calendriers français
+  let txWeek = null, weekMode = true;
+  const isoOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return isoOf(d); };
+  const mondayOf = (iso) => { const d = new Date((iso || todayISO()) + "T12:00:00"); return addDays(isoOf(d), -((d.getDay() + 6) % 7)); };
+  function weekNumber(iso) {
+    const d = new Date(addDays(mondayOf(iso), 3) + "T12:00:00"); // le jeudi décide de l'année
+    const jan1 = new Date(d.getFullYear(), 0, 1, 12);
+    return 1 + Math.floor(Math.round((d - jan1) / 864e5) / 7); // arrondi : le passage à l'heure d'été décale d'une heure
+  }
+  function monthWeeks(ym) {
+    const out = [], last = `${ym}-${pad(daysIn(ym))}`;
+    for (let m = mondayOf(ym + "-01"); m <= last; m = addDays(m, 7)) out.push(m);
+    return out;
+  }
+  // Semaine montrée par défaut : celle d'aujourd'hui, sinon celle de la dernière opération du mois
+  function defaultWeek(weeks, list) {
+    const today = mondayOf(todayISO());
+    if (weeks.includes(today)) return today;
+    return list.length ? mondayOf(list[0].date) : weeks[weeks.length - 1];
+  }
+  function weekLabel(monday) {
+    const first = month + "-01", last = `${month}-${pad(daysIn(month))}`;
+    const a = monday < first ? first : monday, b = addDays(monday, 6) > last ? last : addDays(monday, 6);
+    const f = (iso, o) => new Date(iso + "T12:00:00").toLocaleDateString(LOC(), o);
+    const range = a === b ? f(a, { day: "numeric", month: "short" }) : `${f(a, { day: "numeric" })} – ${f(b, { day: "numeric", month: "short" })}`;
+    return `${tr("Semaine {n}", { n: weekNumber(monday) })} · ${range}`;
+  }
 
   function show(view) {
     for (const v of ["loading", "auth", "setup", "app"]) $("#view-" + v).hidden = v !== view;
@@ -1016,13 +1125,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   }
   $("#toast-action").addEventListener("click", async () => {
     const fn = toastUndo; toastUndo = null; $("#toast").hidden = true;
-    if (fn) { try { await fn(); toast("Annulé."); } catch (err) { writeError(err); } }
+    if (fn) { try { await fn(); toast(tr("Annulé.")); } catch (err) { writeError(err); } }
   });
   function writeError(e) {
     const code = e && e.code;
-    if (code === "quota_exceeded") toast("Ton carnet est plein : supprime d'anciennes opérations pour en ajouter.");
-    else if (code === "invalid_argument") toast("Tu ne peux pas modifier ce carnet avec ce compte.");
-    else toast("L'enregistrement a échoué. Vérifie ta connexion et réessaie.");
+    if (code === "quota_exceeded") toast(tr("Ton carnet est plein : supprime d'anciennes opérations pour en ajouter."));
+    else if (code === "invalid_argument") toast(tr("Tu ne peux pas modifier ce carnet avec ce compte."));
+    else toast(tr("L'enregistrement a échoué. Vérifie ta connexion et réessaie."));
   }
 
   // ---------- Démarrage ----------
@@ -1032,7 +1141,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     // Avec la synchronisation activée, il faut un compte ; sinon le carnet reste sur cet appareil.
     if (S.syncEnabled && !S.session) {
       show("auth");
-      if (S.linkError) setAuthMode("in", S.linkError === "otp_expired" ? "Ce lien a expiré. Demande-en un nouveau." : "Ce lien n'est plus valable. Reconnecte-toi.");
+      if (S.linkError) setAuthMode("in", tr(S.linkError === "otp_expired" ? "Ce lien a expiré. Demande-en un nouveau." : "Ce lien n'est plus valable. Reconnecte-toi."));
       else setAuthMode(authMode);
       return;
     }
@@ -1067,7 +1176,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   }
   let authMode = "in";
   const AUTH_UI = {
-    in: { title: "Connecte&#8209;toi à ton carnet", lead: "Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.", submit: "Se connecter", passLabel: "Mot de passe", ac: "current-password" },
+    in: { title: "Connecte‑toi à ton carnet", lead: "Ton compte relie ton téléphone et ton ordinateur. Une fois connecté, le carnet marche aussi sans réseau.", submit: "Se connecter", passLabel: "Mot de passe", ac: "current-password" },
     up: { title: "Crée ton compte", lead: "Choisis un mot de passe solide : il protège tes données financières.", submit: "Créer mon compte", passLabel: "Mot de passe", ac: "new-password" },
     forgot: { title: "Mot de passe oublié", lead: "Indique ton adresse : tu recevras un lien pour choisir un nouveau mot de passe.", submit: "Recevoir le lien", passLabel: "", ac: "" },
     reset: { title: "Nouveau mot de passe", lead: "Choisis ton nouveau mot de passe.", submit: "Enregistrer le mot de passe", passLabel: "Nouveau mot de passe", ac: "new-password" },
@@ -1075,60 +1184,60 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   function setAuthMode(m, msg, isInfo) {
     authMode = m;
     const ui = AUTH_UI[m];
-    $("#auth-title").innerHTML = ui.title;
-    $("#auth-lead").textContent = ui.lead;
-    $("#auth-submit").textContent = ui.submit;
+    $("#auth-title").textContent = tr(ui.title);
+    $("#auth-lead").textContent = tr(ui.lead);
+    $("#auth-submit").textContent = tr(ui.submit);
     $("#auth-tabs").hidden = !(m === "in" || m === "up");
     document.querySelectorAll("#auth-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
     $("#auth-email-wrap").hidden = m === "reset";
     $("#auth-pass-wrap").hidden = m === "forgot";
-    $("#auth-pass-label").textContent = ui.passLabel;
+    $("#auth-pass-label").textContent = ui.passLabel && tr(ui.passLabel);
     $("#auth-pass").setAttribute("autocomplete", ui.ac || "off");
     const strong = m === "up" || m === "reset";
     $("#auth-rules").hidden = !strong;
     $("#auth-pass2-wrap").hidden = !strong;
     $("#auth-consent-wrap").hidden = m !== "up";
-    $("#auth-forgot").textContent = m === "forgot" ? "Retour à la connexion" : "Mot de passe oublié ?";
+    $("#auth-forgot").textContent = tr(m === "forgot" ? "Retour à la connexion" : "Mot de passe oublié ?");
     $("#auth-forgot").hidden = m === "up" || m === "reset";
     const err = $("#auth-err"); err.textContent = msg || ""; err.classList.toggle("info", !!isInfo);
     paintRules();
   }
   function authError(e) {
     const m = String((e && e.message) || "") + " " + String((e && e.code) || "");
-    if (/invalid login|invalid_credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
-    if (/already registered|user_already_exists/i.test(m)) return "Un compte existe déjà avec cet e-mail : utilise « Se connecter ».";
-    if (/email not confirmed|email_not_confirmed/i.test(m)) return "Confirme d'abord ton adresse : clique sur le lien reçu par e-mail.";
-    if (/weak_password|password should/i.test(m)) return "Mot de passe refusé par le serveur : il est trop faible.";
-    if (/same_password/i.test(m)) return "Choisis un mot de passe différent de l'ancien.";
-    if (/rate limit|over_email_send_rate_limit|429/i.test(m)) return "Trop de tentatives. Patiente quelques minutes puis réessaie.";
-    if (!navigator.onLine) return "Pas de réseau : cette étape a besoin d'internet.";
-    return "L'opération a échoué. Réessaie dans un instant.";
+    if (/invalid login|invalid_credentials/i.test(m)) return tr("E-mail ou mot de passe incorrect.");
+    if (/already registered|user_already_exists/i.test(m)) return tr("Un compte existe déjà avec cet e-mail : utilise « Se connecter ».");
+    if (/email not confirmed|email_not_confirmed/i.test(m)) return tr("Confirme d'abord ton adresse : clique sur le lien reçu par e-mail.");
+    if (/weak_password|password should/i.test(m)) return tr("Mot de passe refusé par le serveur : il est trop faible.");
+    if (/same_password/i.test(m)) return tr("Choisis un mot de passe différent de l'ancien.");
+    if (/rate limit|over_email_send_rate_limit|429/i.test(m)) return tr("Trop de tentatives. Patiente quelques minutes puis réessaie.");
+    if (!navigator.onLine) return tr("Pas de réseau : cette étape a besoin d'internet.");
+    return tr("L'opération a échoué. Réessaie dans un instant.");
   }
   async function doAuth() {
     const email = $("#auth-email").value.trim(), pass = $("#auth-pass").value, pass2 = $("#auth-pass2").value;
     const say = (t, info) => { const e = $("#auth-err"); e.textContent = t; e.classList.toggle("info", !!info); };
-    if (authMode !== "reset" && !/^\S+@\S+\.\S+$/.test(email)) return say("Indique une adresse e-mail valide.");
-    if (authMode === "in" && !pass) return say("Indique ton mot de passe.");
+    if (authMode !== "reset" && !/^\S+@\S+\.\S+$/.test(email)) return say(tr("Indique une adresse e-mail valide."));
+    if (authMode === "in" && !pass) return say(tr("Indique ton mot de passe."));
     if (authMode === "up" || authMode === "reset") {
-      if (!pwOk(pass)) return say("Ton mot de passe doit respecter les 5 règles ci-dessus.");
-      if (pass !== pass2) return say("Les deux mots de passe ne sont pas identiques.");
+      if (!pwOk(pass)) return say(tr("Ton mot de passe doit respecter les 5 règles ci-dessus."));
+      if (pass !== pass2) return say(tr("Les deux mots de passe ne sont pas identiques."));
     }
-    if (authMode === "up" && !$("#auth-consent").checked) return say("Coche la case pour accepter la politique de confidentialité.");
+    if (authMode === "up" && !$("#auth-consent").checked) return say(tr("Coche la case pour accepter la politique de confidentialité."));
     say("");
     const btn = $("#auth-submit"); btn.disabled = true;
     try {
       if (authMode === "in") { await S.signIn(email, pass); boot(); }
       else if (authMode === "up") {
         const r = await S.signUp(email, pass);
-        if (r === "confirm") { setAuthMode("in", "Compte créé ! Ouvre l'e-mail de confirmation et clique sur le lien : il te ramènera ici, déjà connecté.", true); $("#auth-pass").value = ""; $("#auth-pass2").value = ""; }
+        if (r === "confirm") { setAuthMode("in", tr("Compte créé ! Ouvre l'e-mail de confirmation et clique sur le lien : il te ramènera ici, déjà connecté."), true); $("#auth-pass").value = ""; $("#auth-pass2").value = ""; }
         else boot();
       } else if (authMode === "forgot") {
         await S.recover(email);
-        setAuthMode("in", "Si un compte existe avec cette adresse, un e-mail vient de partir. Ouvre le lien qu'il contient.", true);
+        setAuthMode("in", tr("Si un compte existe avec cette adresse, un e-mail vient de partir. Ouvre le lien qu'il contient."), true);
       } else if (authMode === "reset") {
         await S.updatePassword(pass);
         $("#auth-pass").value = ""; $("#auth-pass2").value = "";
-        boot(); toast("Mot de passe modifié.");
+        boot(); toast(tr("Mot de passe modifié."));
       }
     } catch (e) { say(authError(e)); }
     finally { btn.disabled = false; }
@@ -1140,17 +1249,24 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   $("#auth-eye").addEventListener("click", () => {
     const show = $("#auth-pass").type === "password";
     $("#auth-pass").type = show ? "text" : "password"; $("#auth-pass2").type = show ? "text" : "password";
-    $("#auth-eye").textContent = show ? "Masquer" : "Afficher";
-    $("#auth-eye").setAttribute("aria-pressed", String(show));
-    $("#auth-eye").setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+    paintEye();
   });
+  function paintEye() {
+    const show = $("#auth-pass").type === "text";
+    $("#auth-eye").textContent = tr(show ? "Masquer" : "Afficher");
+    $("#auth-eye").setAttribute("aria-pressed", String(show));
+    $("#auth-eye").setAttribute("aria-label", tr(show ? "Masquer le mot de passe" : "Afficher le mot de passe"));
+  }
 
   // ---------- État de la synchronisation ----------
   const SYNC_TXT = { local: "Sur cet appareil", idle: "Prêt", syncing: "Synchro…", synced: "Synchronisé", offline: "Hors ligne", error: "Synchro en attente", signedout: "Reconnecte-toi" };
-  S.onStatus((s) => {
+  function paintSync(s) {
     $("#sync-chip").dataset.s = s;
-    $("#sync-label").textContent = SYNC_TXT[s] || s;
-    $("#sync-chip").title = s === "offline" ? "Tes saisies sont gardées sur l'appareil et partiront au retour du réseau." : "Synchroniser maintenant";
+    $("#sync-label").textContent = SYNC_TXT[s] ? tr(SYNC_TXT[s]) : s;
+    $("#sync-chip").title = tr(s === "offline" ? "Tes saisies sont gardées sur l'appareil et partiront au retour du réseau." : "Synchroniser maintenant");
+  }
+  S.onStatus((s) => {
+    paintSync(s);
     if (s === "signedout" && S.syncEnabled) { started = false; location.reload(); }
   });
   $("#sync-chip").addEventListener("click", () => S.syncNow());
@@ -1158,8 +1274,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // ---------- Mes données ----------
   function accountLine() {
     const a = $("#account-line");
-    if (!S.syncEnabled) a.textContent = "Synchronisation désactivée : tes données restent sur cet appareil. Pense à exporter de temps en temps.";
-    else a.textContent = S.session ? `Connecté avec ${S.session.user.email}. Tes données se synchronisent entre tes appareils.` : "";
+    if (!S.syncEnabled) a.textContent = tr("Synchronisation désactivée : tes données restent sur cet appareil. Pense à exporter de temps en temps.");
+    else a.textContent = S.session ? tr("Connecté avec {x}. Tes données se synchronisent entre tes appareils.", { x: S.session.user.email }) : "";
     $("#sign-out").hidden = !(S.syncEnabled && S.session);
     $("#delete-zone").hidden = !(S.syncEnabled && S.session);
   }
@@ -1170,31 +1286,31 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     a.download = `carnet-budget-${todayISO()}.json`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    toast("Fichier exporté.");
+    toast(tr("Fichier exporté."));
   });
   $("#import-file").addEventListener("change", async (e) => {
     const f = e.target.files && e.target.files[0]; e.target.value = "";
     if (!f) return;
-    try { const n = S.importData(JSON.parse(await f.text())); toast(`${n} opération${n > 1 ? "s" : ""} importée${n > 1 ? "s" : ""}.`); closeSettings(); }
-    catch (err) { toast(err.message && err.message.startsWith("Ce fichier") ? err.message : "Ce fichier n'a pas pu être lu."); }
+    try { const n = S.importData(JSON.parse(await f.text())); toast(plural(n, "{n} opération importée.", "{n} opérations importées.")); closeSettings(); }
+    catch (err) { toast(tr(err.message && err.message.startsWith("Ce fichier") ? err.message : "Ce fichier n'a pas pu être lu.")); }
   });
   $("#sign-out").addEventListener("click", async () => {
-    if (S.hasPending && !navigator.onLine) { toast("Des saisies ne sont pas encore synchronisées : reconnecte-toi à internet avant de te déconnecter."); return; }
+    if (S.hasPending && !navigator.onLine) { toast(tr("Des saisies ne sont pas encore synchronisées : reconnecte-toi à internet avant de te déconnecter.")); return; }
     $("#sign-out").disabled = true;
     await S.signOut();
   });
   // Suppression du compte : deux clics, le second dans les 5 secondes.
   $("#delete-account").addEventListener("click", async (e) => {
     const b = e.currentTarget;
-    if (!navigator.onLine) { toast("La suppression du compte a besoin d'internet."); return; }
+    if (!navigator.onLine) { toast(tr("La suppression du compte a besoin d'internet.")); return; }
     if (!b.classList.contains("armed")) {
-      b.classList.add("armed"); b.textContent = "Confirmer la suppression définitive";
-      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Supprimer mon compte et mes données"; } }, 5000);
+      b.classList.add("armed"); b.textContent = tr("Confirmer la suppression définitive");
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = tr("Supprimer mon compte et mes données"); } }, 5000);
       return;
     }
-    b.disabled = true; b.textContent = "Suppression…";
+    b.disabled = true; b.textContent = tr("Suppression…");
     try { await S.deleteAccount(); }
-    catch (err) { toast("La suppression a échoué. Réessaie plus tard."); b.disabled = false; b.classList.remove("armed"); b.textContent = "Supprimer mon compte et mes données"; }
+    catch (err) { toast(tr("La suppression a échoué. Réessaie plus tard.")); b.disabled = false; b.classList.remove("armed"); b.textContent = tr("Supprimer mon compte et mes données"); }
   });
 
   // ---------- Montants mensuels automatiques ----------
@@ -1235,7 +1351,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       try { await txCol.doc(o.id).set(doc); added++; } catch (err) { writeError(err); break; }
     }
     recRunning = false;
-    if (added) toast(added === 1 ? `${todo[0].r.name} ajouté automatiquement.` : `${added} montants mensuels ajoutés automatiquement.`);
+    if (added) toast(added === 1 ? tr("{x} ajouté automatiquement.", { x: nameOf(todo[0].r.name) }) : tr("{n} montants mensuels ajoutés automatiquement.", { n: added }));
   }
 
   // ---------- Calculs ----------
@@ -1297,32 +1413,32 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     ravEl.classList.toggle("neg", rav < 0);
     ravEl.classList.remove("preview");
     document.body.classList.toggle("dusk", rav < 0 && t.in > 0);
-    $("#rav-sub").textContent = t.in ? `Sur ${money(t.in)} de revenus, après dépenses et épargne.` : "Aucun revenu enregistré pour ce mois.";
+    $("#rav-sub").textContent = t.in ? tr("Sur {x} de revenus, après dépenses et épargne.", { x: money(t.in) }) : tr("Aucun revenu enregistré pour ce mois.");
     const upcoming = month === curMonth() ? recOccurrences("upcoming").filter((o) => o.r.type !== "revenu") : [];
     const upSum = upcoming.reduce((a, o) => a + o.r.amount, 0);
     const up = $("#rav-upcoming");
     up.hidden = !upSum;
-    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>Encore ${esc(money(upSum))} de prélèvements prévus : ${esc(money(rav - upSum))} vraiment disponibles.</span>`;
+    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>${esc(tr("Encore {a} de prélèvements prévus : {b} vraiment disponibles.", { a: money(upSum), b: money(rav - upSum) }))}</span>`;
     const qs = $("#quick-salary");
     const hasAutoIncome = (recs || []).some((r) => r.type === "revenu");
     const hasSalary = t.list.some((x) => x.type === "revenu" && (x.label || "").toLowerCase() === "salaire");
     qs.hidden = !(profile.salary && !hasAutoIncome && !hasSalary);
-    qs.textContent = `Ajouter mon salaire (${money(profile.salary)})`;
+    qs.textContent = tr("Ajouter mon salaire ({x})", { x: money(profile.salary) });
 
     $("#st-in").textContent = money(t.in);
-    $("#st-in-sub").textContent = profile.salary ? `Salaire prévu : ${money(profile.salary)}` : "";
+    $("#st-in-sub").textContent = profile.salary ? tr("Salaire prévu : {x}", { x: money(profile.salary) }) : "";
     $("#st-out").textContent = money(t.out);
     const totalBudget = cats.reduce((a, c) => a + (c.budget || 0), 0);
-    $("#st-out-sub").textContent = totalBudget ? `Budget total : ${money(totalBudget)}` : "Aucun budget défini";
+    $("#st-out-sub").textContent = totalBudget ? tr("Budget total : {x}", { x: money(totalBudget) }) : tr("Aucun budget défini");
     $("#st-save").textContent = money(t.save);
     const goal = profile.savingsGoal || 0;
     const gp = goal ? Math.min(100, (t.save / goal) * 100) : 0;
     const sb = $("#st-save-bar");
     sb.className = "bar " + (goal && t.save >= goal ? "ok" : "");
     sb.firstElementChild.style.width = gp + "%";
-    $("#st-save-sub").textContent = goal ? (t.save >= goal ? `Objectif de ${money(goal)} atteint` : `Encore ${money(goal - t.save)} pour l'objectif`) : "Pas d'objectif défini";
+    $("#st-save-sub").textContent = goal ? (t.save >= goal ? tr("Objectif de {x} atteint", { x: money(goal) }) : tr("Encore {x} pour l'objectif", { x: money(goal - t.save) })) : tr("Pas d'objectif défini");
     $("#st-bal").textContent = money(bal);
-    $("#st-bal-sub").textContent = `Épargne totale : ${money(sav)}`;
+    $("#st-bal-sub").textContent = tr("Épargne totale : {x}", { x: money(sav) });
 
     renderSky(t, cats, totalBudget);
 
@@ -1334,33 +1450,45 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
           const pct = (v / base) * 100;
           const over = name !== "Épargne" && pct > target;
           const color = over ? "--bad" : name === "Épargne" && pct >= target ? "--ok" : "--sky-2";
-          return `<div class="rule-row"><span>${name}</span>
+          return `<div class="rule-row"><span>${tr(name)}</span>
             <div class="rule-bar"><i style="width:${Math.min(100, pct)}%;background:var(${color})"></i><u style="left:${target}%"></u></div>
             <span class="num">${Math.round(pct)} %</span></div>`;
-        }).join("") + (t.in ? "" : `<p class="muted" style="font-size:0.85rem">Calculé sur ton salaire prévu, faute de revenus saisis ce mois-ci.</p>`)
-      : `<div class="empty">Indique ton salaire dans les réglages pour voir la répartition.</div>`;
+        }).join("") + (t.in ? "" : `<p class="muted" style="font-size:0.85rem">${tr("Calculé sur ton salaire prévu, faute de revenus saisis ce mois-ci.")}</p>`)
+      : `<div class="empty">${tr("Indique ton salaire dans les réglages pour voir la répartition.")}</div>`;
 
     // Catégories du formulaire
     const knownIds = new Set(cats.map((c) => c.id));
     const sel = $("#tx-cat"); const keep = sel.value;
-    sel.innerHTML = catsByUsage().map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    sel.innerHTML = catsByUsage().map((c) => `<option value="${esc(c.id)}">${esc(nameOf(c.name))}</option>`).join("");
     if (sel.dataset.touched && keep && knownIds.has(keep)) sel.value = keep;
     syncDateDefault();
 
     // Opérations, avec un filtre par catégorie
-    const catName = Object.fromEntries(cats.map((c) => [c.id, c.name]));
+    const catName = Object.fromEntries(cats.map((c) => [c.id, nameOf(c.name)]));
     const catRank = Object.fromEntries(cats.map((c, i) => ["c:" + c.id, i]));
     const groups = [...new Set(t.list.map(groupOf))].sort((a, b) => rankOf(a, catRank) - rankOf(b, catRank));
     if (!groups.includes(txFilter)) txFilter = "all";
     const fl = $("#tx-filter");
     fl.hidden = groups.length < 2;
-    fl.innerHTML = groups.length < 2 ? "" : [["all", "Tout", ""], ...groups.map((g) => g.startsWith("c:")
-        ? [g, catName[g.slice(2)] || "Sans catégorie", hueOf(g.slice(2))]
-        : [g, g === "revenu" ? "Revenus" : "Épargne", g === "revenu" ? "var(--ok)" : "var(--sky-1)"])]
+    fl.innerHTML = groups.length < 2 ? "" : [["all", tr("Tout"), ""], ...groups.map((g) => g.startsWith("c:")
+        ? [g, catName[g.slice(2)] || tr("Sans catégorie"), hueOf(g.slice(2))]
+        : [g, tr(g === "revenu" ? "Revenus" : "Épargne"), g === "revenu" ? "var(--ok)" : "var(--sky-1)"])]
       .map(([g, name, hue]) => `<button type="button" class="fchip" data-f="${esc(g)}" aria-pressed="${g === txFilter}"${hue ? ` style="--hue:${hue}"` : ""}>${hue ? "<i></i>" : ""}${esc(name)}</button>`).join("");
-    const shown = txFilter === "all" ? t.list : t.list.filter((x) => groupOf(x) === txFilter);
+    const inFilter = txFilter === "all" ? t.list : t.list.filter((x) => groupOf(x) === txFilter);
+    // Pages par semaine (semaines du calendrier, du lundi au dimanche, numérotées comme en France)
+    const weeks = monthWeeks(month);
+    if (!weeks.includes(txWeek)) txWeek = defaultWeek(weeks, t.list);
+    const wi = weeks.indexOf(txWeek);
+    const wn = $("#week-nav");
+    wn.hidden = !t.list.length;
+    $("#week-label").textContent = weekMode ? weekLabel(txWeek) : monthLabel(month);
+    $("#week-prev").hidden = $("#week-next").hidden = !weekMode;
+    $("#week-prev").disabled = wi <= 0;
+    $("#week-next").disabled = wi >= weeks.length - 1;
+    $("#week-toggle").textContent = tr(weekMode ? "Tout le mois" : "Par semaine");
+    const shown = weekMode ? inFilter.filter((x) => mondayOf(x.date) === txWeek) : inFilter;
     const shownSum = shown.reduce((a, x) => a + x.amount, 0);
-    $("#tx-count").textContent = shown.length ? `${shown.length} opération${shown.length > 1 ? "s" : ""}${txFilter !== "all" ? " · " + money(shownSum) : ""}` : "";
+    $("#tx-count").textContent = shown.length ? plural(shown.length, "{n} opération", "{n} opérations") + (txFilter !== "all" ? " · " + money(shownSum) : "") : "";
     $("#tx-help").hidden = !t.list.length;
     let lastDay = null;
     $("#tx-list").innerHTML = shown.length
@@ -1368,17 +1496,19 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
           const head = x.date !== lastDay ? `<li class="tx-day">${esc(dayLabel(x.date))}</li>` : "";
           lastDay = x.date;
           const chip = x.type === "depense"
-            ? `<span class="chip" style="--hue:${hueOf(x.cat)}"><i></i>${esc(catName[x.cat] || "Sans catégorie")}</span>`
+            ? `<span class="chip" style="--hue:${hueOf(x.cat)}"><i></i>${esc(catName[x.cat] || tr("Sans catégorie"))}</span>`
             : `<span class="chip ${x.type}">${TYPE_LABEL[x.type]}</span>`;
           const sign = x.type === "revenu" ? 1 : -1;
-          const title = x.label || (x.type === "depense" ? catName[x.cat] || "Dépense" : TYPE_LABEL[x.type]);
+          const title = nameOf(x.label) || (x.type === "depense" ? catName[x.cat] || TYPE_LABEL.depense : TYPE_LABEL[x.type]);
           return head + `<li class="tx${x.id === freshId ? " fresh" : ""}" data-row="${esc(x.id)}">
-            <span class="t"><b>${esc(title)}</b><span class="tags">${chip}${x.recId ? '<span class="chip auto">auto</span>' : ""}</span></span>
-            <button class="amt num ${x.type}" data-edit="${esc(x.id)}" title="Modifier">${money(sign * x.amount, { sign: true })}</button>
-            <button class="ico-btn" data-edit="${esc(x.id)}" aria-label="Modifier « ${esc(title)} »">${PEN}</button>
-            <button class="del del-ico" data-id="${esc(x.id)}" aria-label="Supprimer « ${esc(title)} »">${TRASH}</button></li>`;
+            <span class="t"><b>${esc(title)}</b><span class="tags">${chip}${x.recId ? '<span class="chip auto">' + tr("auto") + '</span>' : ""}</span></span>
+            <button class="amt num ${x.type}" data-edit="${esc(x.id)}" title="${esc(tr("Modifier"))}">${money(sign * x.amount, { sign: true })}</button>
+            <button class="ico-btn" data-edit="${esc(x.id)}" aria-label="${esc(tr("Modifier « {x} »", { x: title }))}">${PEN}</button>
+            <button class="del del-ico" data-id="${esc(x.id)}" aria-label="${esc(tr("Supprimer « {x} »", { x: title }))}">${TRASH}</button></li>`;
         }).join("")
-      : `<li class="empty">Aucune opération en ${esc(monthLabel(month))}. Touche « Dépense » pour noter ta première dépense.</li>`;
+      : t.list.length && weekMode && !inFilter.some((x) => mondayOf(x.date) === txWeek)
+        ? `<li class="empty">${esc(tr("Aucune opération cette semaine."))}</li>`
+        : `<li class="empty">${esc(tr("Aucune opération en {x}. Touche « Dépense » pour noter ta première dépense.", { x: lang === "en" ? monthLabel(month) : monthLabel(month).toLowerCase() }))}</li>`;
     watchFresh();
 
     if (!$("#sheet").hidden) renderPills();
@@ -1391,22 +1521,22 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const known = new Set(cats.map((c) => c.id));
     const items = cats.map((c) => ({ id: c.id, name: c.name, spent: t.byCat[c.id] || 0, budget: c.budget || 0 }));
     const orphan = Object.keys(t.byCat).filter((id) => !known.has(id)).reduce((a, id) => a + t.byCat[id], 0);
-    if (orphan) items.push({ id: "_orphan", name: "Sans catégorie", spent: orphan, budget: 0 });
+    if (orphan) items.push({ id: "_orphan", name: tr("Sans catégorie"), spent: orphan, budget: 0 });
     const spent = items.filter((c) => c.spent > 0).sort((a, b) => b.spent - a.spent);
     const calm = items.filter((c) => !c.spent && c.budget);
     $("#sky-zero").innerHTML = calm.length
-      ? `<span class="lbl">Pas encore de dépense :</span>` + calm.map((c) => `<span style="--hue:${hueOf(c.id)}"><i></i>${esc(c.name)} · ${money(c.budget)}</span>`).join("")
+      ? `<span class="lbl">${tr("Pas encore de dépense :")}</span>` + calm.map((c) => `<span style="--hue:${hueOf(c.id)}"><i></i>${esc(nameOf(c.name))} · ${money(c.budget)}</span>`).join("")
       : "";
     const field = $("#cat-list");
-    if (!cats.length) { field.innerHTML = note("Aucune catégorie. Ajoute-en dans les réglages."); return; }
-    if (!spent.length) { field.innerHTML = note("Ciel dégagé : aucune dépense ce mois-ci.") + (totalBudget ? "" : tipNote()); bindTip(); return; }
+    if (!cats.length) { field.innerHTML = note(tr("Aucune catégorie. Ajoute-en dans les réglages.")); return; }
+    if (!spent.length) { field.innerHTML = note(tr("Ciel dégagé : aucune dépense ce mois-ci.")) + (totalBudget ? "" : tipNote()); bindTip(); return; }
 
     const W = Math.max(280, field.clientWidth || 340);
     const maxW = Math.min(300, W * 0.62);
     const max = spent[0].spent;
     const cells = spent.map((c) => {
       const w = Math.max(44, Math.sqrt(c.spent / max) * maxW);
-      const small = w < 150;
+      const small = w < 168;
       return { c, w, small, box: small ? Math.max(w, 112) : w };
     });
     // Rangées qui tiennent dans la largeur ; on évite un petit nuage seul sur la dernière ligne.
@@ -1424,20 +1554,20 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     bindTip();
   }
   // Silhouette de chaque nuage, en alternance, pour un ciel moins répétitif
-  const SHAPES = ['<use href="#cloud"/>', '<use href="#cloud-alt" class="flip"/>', '<use href="#cloud" class="flip"/>', '<use href="#cloud-alt"/>'];
+  const SHAPES = ['<use href="#cloud-a"/>', '<use href="#cloud-b" class="flip"/>', '<use href="#cloud-a" class="flip"/>', '<use href="#cloud-b"/>'];
   function cloudHTML({ c, w, small }, dy, use) {
     const over = c.budget && c.spent > c.budget;
-    const sub = c.budget ? (over ? `dépassé de ${money(c.spent - c.budget)}` : `sur ${money(c.budget)}`) : "sans budget";
+    const sub = c.budget ? (over ? tr("dépassé de {x}", { x: money(c.spent - c.budget) }) : tr("sur {x}", { x: money(c.budget) })) : tr("sans budget");
     const bar = c.budget ? `<span class="cl-bar"><i style="width:${Math.min(100, (c.spent / c.budget) * 100)}%"></i></span>` : "";
     const hue = c.id === "_orphan" ? "#6f80a8" : hueOf(c.id);
-    const text = `<span class="cl-name"><i></i>${esc(c.name)}</span><b class="num">${money(c.spent)}</b><small>${sub}</small>${bar}`;
+    const text = `<span class="cl-name"><i></i>${esc(nameOf(c.name))}</span><b class="num">${money(c.spent)}</b><small>${sub}</small>${bar}`;
     const shape = `<svg aria-hidden="true" preserveAspectRatio="none">${use}</svg>`;
     return small
       ? `<div class="cl small${over ? " storm" : ""}" style="--w:${w.toFixed(0)}px;--hue:${hue};--dy:${dy}px"><div class="cl-shape">${shape}</div><div class="cl-pill">${text}</div></div>`
       : `<div class="cl${over ? " storm" : ""}" style="--w:${w.toFixed(0)}px;--hue:${hue};--dy:${dy}px"><div class="cl-shape">${shape}<div class="cl-txt">${text}</div></div></div>`;
   }
   const note = (s) => `<p class="sky-note"><span>${esc(s)}</span></p>`;
-  const tipNote = () => `<p class="sky-note"><span>Fixe un budget par catégorie dans les <a href="#" id="open-settings-link">réglages</a> pour voir où tu en es.</span></p>`;
+  const tipNote = () => `<p class="sky-note"><span>${tr("Fixe un budget par catégorie dans les")} <a href="#" id="open-settings-link">${tr("réglages")}</a> ${tr("pour voir où tu en es.")}</span></p>`;
   function bindTip() { const l = $("#open-settings-link"); if (l) l.addEventListener("click", (e) => { e.preventDefault(); openSettings(); }); }
   let skyResize;
   window.addEventListener("resize", () => { clearTimeout(skyResize); skyResize = setTimeout(() => { if (skyArgs && !$("#view-app").hidden) renderSky(...skyArgs); }, 120); });
@@ -1463,8 +1593,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const ref = txCol.doc();
     freshId = ref.id;
     await ref.set({ ...doc, createdAt: Date.now() });
-    if (monthOf(doc.date) !== month) { month = monthOf(doc.date); render(); }
-    const what = doc.type === "depense" ? ((profile.categories || []).find((c) => c.id === doc.cat) || {}).name || "Dépense" : ADDED[doc.type];
+    txWeek = mondayOf(doc.date); weekMode = true;
+    if (monthOf(doc.date) !== month) month = monthOf(doc.date);
+    render();
+    const what = doc.type === "depense" ? nameOf(((profile.categories || []).find((c) => c.id === doc.cat) || {}).name) || TYPE_LABEL.depense : ADDED[doc.type];
     toast(`${what} · ${money(doc.amount)}`, () => ref.delete());
   }
 
@@ -1474,8 +1606,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const t = monthTotals(curMonth());
     $("#q-pills").innerHTML = catsByUsage().map((c) => {
       const left = (c.budget || 0) - (t.byCat[c.id] || 0);
-      const sub = c.budget ? `<small class="${left < 0 ? "low" : ""}">${left < 0 ? "dépassé de " + money(-left) : "reste " + money(left)}</small>` : "";
-      return `<button type="button" class="pill" data-cat="${esc(c.id)}" style="--hue:${hueOf(c.id)}"><b><i></i>${esc(c.name)}</b>${sub}</button>`;
+      const sub = c.budget ? `<small class="${left < 0 ? "low" : ""}">${left < 0 ? tr("dépassé de {x}", { x: money(-left) }) : tr("reste {x}", { x: money(left) })}</small>` : "";
+      return `<button type="button" class="pill" data-cat="${esc(c.id)}" style="--hue:${hueOf(c.id)}"><b><i></i>${esc(nameOf(c.name))}</b>${sub}</button>`;
     }).join("");
   }
   // Pendant la frappe, le reste à vivre baisse en direct.
@@ -1501,9 +1633,9 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const dep = type === "depense";
     $("#q-pills").hidden = !dep;
     $("#q-submit").hidden = dep;
-    $("#q-submit").textContent = type === "revenu" ? "Ajouter le revenu" : "Mettre de côté";
-    $("#sheet-title").textContent = dep ? "Nouvelle dépense" : type === "revenu" ? "Nouveau revenu" : "Mise de côté";
-    hint(dep ? "Touche une catégorie pour enregistrer." : "");
+    $("#q-submit").textContent = tr(type === "revenu" ? "Ajouter le revenu" : "Mettre de côté");
+    $("#sheet-title").textContent = tr(dep ? "Nouvelle dépense" : type === "revenu" ? "Nouveau revenu" : "Mise de côté");
+    hint(dep ? tr("Touche une catégorie pour enregistrer.") : "");
     livePreview();
   }
   function hint(msg, err) { const h = $("#q-hint"); h.textContent = msg; h.classList.toggle("err", !!err); }
@@ -1515,7 +1647,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   }
   function openSheet() {
     $("#q-amount").value = ""; $("#q-label").value = ""; $("#q-date").value = todayISO();
-    $("#q-options").hidden = true; $("#q-more").setAttribute("aria-expanded", "false"); $("#q-more").textContent = "Plus d'options";
+    $("#q-options").hidden = true; $("#q-more").setAttribute("aria-expanded", "false"); $("#q-more").textContent = tr("Plus d'options");
     $("#q-cur").textContent = curSymbol();
     setQType("depense"); renderPills();
     const s = $("#sheet"), b = $("#sheet-backdrop");
@@ -1537,7 +1669,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   function readQuickAmount() {
     const a = parseAmount($("#q-amount").value);
     if (!a || isNaN(a)) {
-      hint("Tape d'abord un montant, par exemple 12,50.", true);
+      hint(tr("Tape d'abord un montant, par exemple 12,50."), true);
       const f = $(".amount-field"); f.classList.remove("nudge"); void f.offsetWidth; f.classList.add("nudge");
       $("#q-amount").focus();
       return null;
@@ -1562,7 +1694,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   $("#q-more").addEventListener("click", () => {
     const o = $("#q-options"); o.hidden = !o.hidden;
     $("#q-more").setAttribute("aria-expanded", String(!o.hidden));
-    $("#q-more").textContent = o.hidden ? "Plus d'options" : "Moins d'options";
+    $("#q-more").textContent = tr(o.hidden ? "Plus d'options" : "Moins d'options");
   });
   document.querySelectorAll("#q-seg button").forEach((b) => b.addEventListener("click", () => setQType(b.dataset.type)));
   if (window.visualViewport) { visualViewport.addEventListener("resize", syncViewport); visualViewport.addEventListener("scroll", syncViewport); }
@@ -1580,8 +1712,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     txType = type;
     document.querySelectorAll("#tx-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.type === type)));
     $("#tx-cat-wrap").hidden = type !== "depense";
-    $("#tx-submit").textContent = type === "depense" ? "Ajouter la dépense" : type === "revenu" ? "Ajouter le revenu" : "Mettre de côté";
-    $("#tx-label").placeholder = type === "depense" ? "ex. Courses Carrefour" : type === "revenu" ? "ex. Prime, remboursement" : "ex. Virement livret A";
+    $("#tx-submit").textContent = tr(type === "depense" ? "Ajouter la dépense" : type === "revenu" ? "Ajouter le revenu" : "Mettre de côté");
+    $("#tx-label").placeholder = tr(type === "depense" ? "ex. Courses Carrefour" : type === "revenu" ? "ex. Prime, remboursement" : "ex. Virement livret A");
   }
   document.querySelectorAll("#tx-seg button").forEach((b) => b.addEventListener("click", () => setType(b.dataset.type)));
   $("#tx-cat").addEventListener("change", (e) => { e.target.dataset.touched = "1"; });
@@ -1589,9 +1721,9 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     e.preventDefault();
     if (!txCol) return;
     const amount = parseAmount($("#tx-amount").value);
-    if (!amount || isNaN(amount)) { toast("Indique un montant valide, par exemple 12,50."); $("#tx-amount").focus(); return; }
+    if (!amount || isNaN(amount)) { toast(tr("Indique un montant valide, par exemple 12,50.")); $("#tx-amount").focus(); return; }
     const date = $("#tx-date").value;
-    if (!date) { toast("Choisis une date."); return; }
+    if (!date) { toast(tr("Choisis une date.")); return; }
     const doc = { type: txType, amount, date, label: $("#tx-label").value.trim().slice(0, 80) };
     if (txType === "depense") doc.cat = $("#tx-cat").value || "autre";
     const btn = $("#tx-submit"); btn.disabled = true;
@@ -1613,7 +1745,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     try {
       if (x && x.recId) await txCol.doc(x.id).update({ skipped: true });
       else await txCol.doc(id).delete();
-      toast("Opération supprimée.");
+      toast(tr("Opération supprimée."));
     } catch (err) { writeError(err); }
   }
   $("#tx-list").addEventListener("click", (e) => {
@@ -1622,12 +1754,15 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const b = e.target.closest(".del"); if (!b) return;
     if (!b.classList.contains("armed")) {
       document.querySelectorAll(".del.armed").forEach((x) => { x.classList.remove("armed"); x.innerHTML = TRASH; });
-      b.classList.add("armed"); b.textContent = "Confirmer";
+      b.classList.add("armed"); b.textContent = tr("Confirmer");
       setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.innerHTML = TRASH; } }, 4000);
       return;
     }
     removeTx(b.dataset.id);
   });
+  $("#week-prev").addEventListener("click", () => { const w = monthWeeks(month), i = w.indexOf(txWeek); if (i > 0) { txWeek = w[i - 1]; render(); } });
+  $("#week-next").addEventListener("click", () => { const w = monthWeeks(month), i = w.indexOf(txWeek); if (i < w.length - 1) { txWeek = w[i + 1]; render(); } });
+  $("#week-toggle").addEventListener("click", () => { weekMode = !weekMode; render(); });
   $("#tx-filter").addEventListener("click", (e) => { const b = e.target.closest(".fchip"); if (b) { txFilter = b.dataset.f; render(); } });
 
   // ---------- Fenêtre « Modifier l'opération » ----------
@@ -1637,15 +1772,15 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     document.querySelectorAll("#edit-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.type === type)));
     $("#edit-cat-wrap").hidden = type !== "depense";
   }
-  function disarmEditDelete() { clearTimeout(editArm); const b = $("#edit-delete"); b.classList.remove("armed"); b.textContent = "Supprimer"; }
+  function disarmEditDelete() { clearTimeout(editArm); const b = $("#edit-delete"); b.classList.remove("armed"); b.textContent = tr("Supprimer"); }
   function openEdit(id) {
     const x = txs.find((y) => y.id === id); if (!x) return;
     const cats = profile.categories || [];
     editId = id;
     $("#edit-amount").value = toInput(x.amount);
     $("#edit-date").value = x.date || todayISO();
-    $("#edit-label").value = x.label || "";
-    $("#edit-cat").innerHTML = cats.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("#edit-label").value = nameOf(x.label || "");
+    $("#edit-cat").innerHTML = cats.map((c) => `<option value="${esc(c.id)}">${esc(nameOf(c.name))}</option>`).join("");
     $("#edit-cat").value = x.cat && cats.some((c) => c.id === x.cat) ? x.cat : (cats[0] || {}).id || "";
     setEditType(x.type || "depense");
     $("#edit-hint").textContent = "";
@@ -1664,10 +1799,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     e.preventDefault();
     const x = txs.find((y) => y.id === editId); if (!x) { closeEdit(); return; }
     const amount = parseAmount($("#edit-amount").value);
-    if (!amount || isNaN(amount)) { $("#edit-hint").textContent = "Indique un montant valide, par exemple 12,50."; $("#edit-amount").focus(); return; }
+    if (!amount || isNaN(amount)) { $("#edit-hint").textContent = tr("Indique un montant valide, par exemple 12,50."); $("#edit-amount").focus(); return; }
     const date = $("#edit-date").value;
-    if (!date) { $("#edit-hint").textContent = "Choisis une date."; $("#edit-date").focus(); return; }
-    const patch = { type: editType, amount, date, label: $("#edit-label").value.trim().slice(0, 80) };
+    if (!date) { $("#edit-hint").textContent = tr("Choisis une date."); $("#edit-date").focus(); return; }
+    const patch = { type: editType, amount, date, label: nameToStore($("#edit-label").value.trim().slice(0, 80)) };
     if (editType === "depense") patch.cat = $("#edit-cat").value || "autre";
     const id = editId;
     closeEdit();
@@ -1675,14 +1810,15 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       await txCol.doc(id).update(patch);
       freshId = id;
       if (monthOf(date) !== month) month = monthOf(date);
+      txWeek = mondayOf(date);
       render();
-      toast("Opération modifiée.");
+      toast(tr("Opération modifiée."));
     } catch (err) { writeError(err); }
   });
   $("#edit-delete").addEventListener("click", async () => {
     const b = $("#edit-delete");
     if (!b.classList.contains("armed")) {
-      b.classList.add("armed"); b.textContent = "Confirmer la suppression";
+      b.classList.add("armed"); b.textContent = tr("Confirmer la suppression");
       editArm = setTimeout(disarmEditDelete, 4000);
       return;
     }
@@ -1690,13 +1826,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (id) await removeTx(id);
   });
 
-  $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); render(); });
-  $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); render(); });
+  $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); txWeek = null; render(); });
+  $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); txWeek = null; render(); });
 
   // ---------- Bandeau : activer le salaire automatique ----------
   $("#notice-on").addEventListener("click", async () => {
     const recurring = profile.salary ? [{ id: "salaire", name: "Salaire", type: "revenu", amount: profile.salary, day: clampDay($("#notice-payday").value), since: curMonth() }] : [];
-    try { await profileRef.update({ recurring }); toast(profile.salary ? "Salaire automatique activé." : "C'est noté. Ajoute tes montants mensuels dans les réglages."); }
+    try { await profileRef.update({ recurring }); toast(tr(profile.salary ? "Salaire automatique activé." : "C'est noté. Ajoute tes montants mensuels dans les réglages.")); }
     catch (err) { writeError(err); }
   });
   $("#notice-off").addEventListener("click", async () => {
@@ -1706,16 +1842,16 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // ---------- Première ouverture ----------
   $("#setup-salary").addEventListener("input", () => {
     const s = parseAmount($("#setup-salary").value);
-    $("#setup-goal").placeholder = s && !isNaN(s) ? "ex. " + toInput(Math.round(s * 0.2)) : "ex. 76";
-    $("#setup-goal-hint").textContent = s && !isNaN(s) ? `Un montant par mois. Repère courant : 20 % du salaire, soit ${money(Math.round(s * 0.2))}.` : "Un montant par mois. Repère courant : 20 % du salaire.";
+    $("#setup-goal").placeholder = s && !isNaN(s) ? tr("ex. {x}", { x: toInput(Math.round(s * 0.2)) }) : tr("ex. 76");
+    $("#setup-goal-hint").textContent = s && !isNaN(s) ? tr("Un montant par mois. Repère courant : 20 % du salaire, soit {x}.", { x: money(Math.round(s * 0.2)) }) : tr("Un montant par mois. Repère courant : 20 % du salaire.");
   });
   $("#setup-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!profileRef) return;
     const salary = parseAmount($("#setup-salary").value);
-    if (!salary || isNaN(salary)) { toast("Indique ton salaire net mensuel."); return; }
+    if (!salary || isNaN(salary)) { toast(tr("Indique ton salaire net mensuel.")); return; }
     const vals = ["#setup-balance", "#setup-savings", "#setup-goal"].map((s) => parseAmount($(s).value));
-    if (vals.some((v) => Number.isNaN(v))) { toast("Un des montants n'est pas valide. Utilise des chiffres, par exemple 850 ou 12,50."); return; }
+    if (vals.some((v) => Number.isNaN(v))) { toast(tr("Un des montants n'est pas valide. Utilise des chiffres, par exemple 850 ou 12,50.")); return; }
     const [startBalance, startSavings, goal] = vals;
     const btn = $("#setup-submit"); btn.disabled = true;
     try {
@@ -1727,7 +1863,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         recurring: [{ id: "salaire", name: "Salaire", type: "revenu", amount: salary, day: clampDay($("#setup-payday").value), since: curMonth() }],
         createdAt: Date.now(),
       });
-      toast("Ton budget est prêt. Ajoute loyer et abonnements dans les réglages.");
+      toast(tr("Ton budget est prêt. Ajoute loyer et abonnements dans les réglages."));
     } catch (err) { writeError(err); }
     btn.disabled = false;
   });
@@ -1742,7 +1878,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#set-savings").value = toInput(profile.startSavings);
     $("#set-currency").value = profile.currency || "EUR";
     $("#set-start-hint").textContent = profile.startDate
-      ? `Au ${new Date(profile.startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}. Les opérations à partir de cette date mettent ton solde à jour.`
+      ? tr("Au {x}. Les opérations à partir de cette date mettent ton solde à jour.", { x: new Date(profile.startDate + "T12:00:00").toLocaleDateString(LOC(), { day: "numeric", month: "long", year: "numeric" }) })
       : "";
     renderSetCats(); renderSetRecs(); accountLine();
     $("#settings").hidden = false;
@@ -1753,31 +1889,31 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   function renderSetCats() {
     $("#set-cats").innerHTML = settingsDraft.map((c, i) => `
       <div class="set-row" data-i="${i}">
-        <input type="text" id="sc-name-${esc(c.id)}" data-f="name" value="${esc(c.name)}" aria-label="Nom de la catégorie" maxlength="40">
-        <input type="text" id="sc-budget-${esc(c.id)}" data-f="budget" inputmode="decimal" value="${esc(c._budgetText ?? toInput(c.budget))}" placeholder="0" aria-label="Budget mensuel">
-        <select class="kind-sel" id="sc-kind-${esc(c.id)}" data-f="kind" aria-label="Type">
-          <option value="besoin"${c.kind === "besoin" ? " selected" : ""}>Besoin</option>
-          <option value="envie"${c.kind === "envie" ? " selected" : ""}>Envie</option>
+        <input type="text" id="sc-name-${esc(c.id)}" data-f="name" value="${esc(nameOf(c.name))}" aria-label="${tr("Nom de la catégorie")}" maxlength="40">
+        <input type="text" id="sc-budget-${esc(c.id)}" data-f="budget" inputmode="decimal" value="${esc(c._budgetText ?? toInput(c.budget))}" placeholder="0" aria-label="${tr("Budget mensuel")}">
+        <select class="kind-sel" id="sc-kind-${esc(c.id)}" data-f="kind" aria-label="${tr("Type")}">
+          <option value="besoin"${c.kind === "besoin" ? " selected" : ""}>${tr("Besoin")}</option>
+          <option value="envie"${c.kind === "envie" ? " selected" : ""}>${tr("Envie")}</option>
         </select>
-        <button type="button" class="del" data-rm="${i}" aria-label="Retirer la catégorie">Retirer</button>
+        <button type="button" class="del" data-rm="${i}" aria-label="${tr("Retirer la catégorie")}">${tr("Retirer")}</button>
       </div>`).join("");
   }
   function renderSetRecs() {
-    const catOpts = (sel) => settingsDraft.map((c) => `<option value="${esc(c.id)}"${c.id === sel ? " selected" : ""}>${esc(c.name)}</option>`).join("");
+    const catOpts = (sel) => settingsDraft.map((c) => `<option value="${esc(c.id)}"${c.id === sel ? " selected" : ""}>${esc(nameOf(c.name))}</option>`).join("");
     $("#set-recs").innerHTML = recDraft.length ? recDraft.map((r, i) => `
       <div class="rec-row" data-i="${i}">
-        <input type="text" id="rc-name-${esc(r.id)}" data-f="name" value="${esc(r.name)}" placeholder="ex. Loyer" aria-label="Nom" maxlength="40">
-        <input type="text" id="rc-amount-${esc(r.id)}" data-f="amount" inputmode="decimal" value="${esc(r._amountText ?? toInput(r.amount))}" placeholder="Montant" aria-label="Montant mensuel">
-        <select id="rc-type-${esc(r.id)}" data-f="type" aria-label="Type">
-          <option value="depense"${r.type === "depense" ? " selected" : ""}>Dépense</option>
-          <option value="revenu"${r.type === "revenu" ? " selected" : ""}>Revenu</option>
-          <option value="epargne"${r.type === "epargne" ? " selected" : ""}>Épargne</option>
+        <input type="text" id="rc-name-${esc(r.id)}" data-f="name" value="${esc(nameOf(r.name))}" placeholder="${tr("ex. Loyer")}" aria-label="${tr("Nom")}" maxlength="40">
+        <input type="text" id="rc-amount-${esc(r.id)}" data-f="amount" inputmode="decimal" value="${esc(r._amountText ?? toInput(r.amount))}" placeholder="${tr("Montant")}" aria-label="${tr("Montant mensuel")}">
+        <select id="rc-type-${esc(r.id)}" data-f="type" aria-label="${tr("Type")}">
+          <option value="depense"${r.type === "depense" ? " selected" : ""}>${TYPE_LABEL.depense}</option>
+          <option value="revenu"${r.type === "revenu" ? " selected" : ""}>${TYPE_LABEL.revenu}</option>
+          <option value="epargne"${r.type === "epargne" ? " selected" : ""}>${TYPE_LABEL.epargne}</option>
         </select>
-        <select id="rc-cat-${esc(r.id)}" data-f="cat" aria-label="Catégorie"${r.type !== "depense" ? " disabled" : ""}>${r.type === "depense" ? catOpts(r.cat) : "<option>—</option>"}</select>
-        <input type="number" id="rc-day-${esc(r.id)}" data-f="day" min="1" max="31" value="${esc(r.day || 1)}" aria-label="Jour du mois" title="Jour du mois">
-        <button type="button" class="del" data-rm="${i}" aria-label="Retirer">Retirer</button>
+        <select id="rc-cat-${esc(r.id)}" data-f="cat" aria-label="${tr("Catégorie")}"${r.type !== "depense" ? " disabled" : ""}>${r.type === "depense" ? catOpts(r.cat) : "<option>—</option>"}</select>
+        <input type="number" id="rc-day-${esc(r.id)}" data-f="day" min="1" max="31" value="${esc(r.day || 1)}" aria-label="${tr("Jour du mois")}" title="${tr("Jour du mois")}">
+        <button type="button" class="del" data-rm="${i}" aria-label="${tr("Retirer")}">${tr("Retirer")}</button>
       </div>`).join("")
-      : `<div class="empty">Rien pour l'instant. Ajoute ton loyer, tes abonnements ou ton salaire.</div>`;
+      : `<div class="empty">${tr("Rien pour l'instant. Ajoute ton loyer, tes abonnements ou ton salaire.")}</div>`;
   }
   $("#set-cats").addEventListener("input", (e) => {
     const row = e.target.closest(".set-row"); if (!row) return;
@@ -1796,7 +1932,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     settingsDraft.splice(+b.dataset.rm, 1); renderSetCats(); renderSetRecs();
   });
   $("#add-cat").addEventListener("click", () => {
-    settingsDraft.push({ id: newId("c"), name: "Nouvelle catégorie", kind: "envie", budget: 0 });
+    settingsDraft.push({ id: newId("c"), name: tr("Nouvelle catégorie"), kind: "envie", budget: 0 });
     renderSetCats(); renderSetRecs();
     const last = $("#set-cats").lastElementChild; if (last) last.querySelector("input").select();
   });
@@ -1827,7 +1963,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const nums = {};
     for (const [k, sel] of [["salary", "#set-salary"], ["savingsGoal", "#set-goal"], ["startBalance", "#set-balance"], ["startSavings", "#set-savings"]]) {
       const v = parseAmount($(sel).value);
-      if (Number.isNaN(v)) { toast("Un des montants n'est pas valide. Utilise des chiffres, par exemple 850 ou 12,50."); $(sel).focus(); return; }
+      if (Number.isNaN(v)) { toast(tr("Un des montants n'est pas valide. Utilise des chiffres, par exemple 850 ou 12,50.")); $(sel).focus(); return; }
       nums[k] = v || 0;
     }
     const categories = [];
@@ -1835,10 +1971,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       let budget = c.budget || 0;
       if (c._budgetText !== undefined) {
         const v = parseAmount(c._budgetText);
-        if (Number.isNaN(v)) { toast(`Le budget de « ${c.name} » n'est pas valide.`); return; }
+        if (Number.isNaN(v)) { toast(tr("Le budget de « {x} » n'est pas valide.", { x: c.name })); return; }
         budget = v || 0;
       }
-      categories.push({ id: c.id, name: (c.name || "").trim() || "Sans nom", kind: c.kind === "besoin" ? "besoin" : "envie", budget });
+      categories.push({ id: c.id, name: nameToStore((c.name || "").trim()) || tr("Sans nom"), kind: c.kind === "besoin" ? "besoin" : "envie", budget });
     }
     const catIds = new Set(categories.map((c) => c.id));
     const recurring = [];
@@ -1846,13 +1982,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       let amount = r.amount || 0;
       if (r._amountText !== undefined) {
         const v = parseAmount(r._amountText);
-        if (Number.isNaN(v)) { toast(`Le montant de « ${r.name || "sans nom"} » n'est pas valide.`); return; }
+        if (Number.isNaN(v)) { toast(tr("Le montant de « {x} » n'est pas valide.", { x: r.name || tr("sans nom") })); return; }
         amount = v || 0;
       }
-      const name = (r.name || "").trim();
+      const name = nameToStore((r.name || "").trim());
       if (!name && !amount) continue;
-      if (!amount) { toast(`Indique un montant pour « ${name} ».`); return; }
-      const item = { id: r.id, name: name || TYPE_LABEL[r.type], type: r.type, amount, day: clampDay(r.day), since: r.since || curMonth() };
+      if (!amount) { toast(tr("Indique un montant pour « {x} ».", { x: name })); return; }
+      const item = { id: r.id, name: name || TYPE_FR[r.type], type: r.type, amount, day: clampDay(r.day), since: r.since || curMonth() };
       if (r.type === "depense") item.cat = catIds.has(r.cat) ? r.cat : "autre";
       recurring.push(item);
     }
@@ -1860,7 +1996,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     try {
       for (const k in fmtCache) delete fmtCache[k];
       await profileRef.update({ ...nums, currency: $("#set-currency").value, categories, recurring });
-      toast("Réglages enregistrés.");
+      toast(tr("Réglages enregistrés."));
       closeSettings();
     } catch (err) { writeError(err); }
     btn.disabled = false;
@@ -1883,15 +2019,19 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (animate && root.dataset.theme !== t && document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(go);
     else go();
     $("#theme-btn use").setAttribute("href", "#" + THEMES[themeChoice][1]);
-    $("#theme-label").textContent = THEMES[themeChoice][0];
-    $("#theme-btn").setAttribute("aria-label", "Thème : " + THEMES[themeChoice][0]);
+    $("#theme-label").textContent = tr(THEMES[themeChoice][0]);
+    $("#theme-btn").setAttribute("aria-label", tr("Thème : {x}", { x: tr(THEMES[themeChoice][0]) }));
     document.querySelectorAll("#theme-menu button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === themeChoice)));
   }
-  function themeMenu(open) {
-    $("#theme-menu").hidden = !open;
-    $("#theme-btn").setAttribute("aria-expanded", String(open));
-    if (open) ($("#theme-menu [aria-pressed=true]") || $("#theme-menu button")).focus();
+  function popMenu(name, open) {
+    for (const k of ["theme", "lang"]) {
+      const on = k === name && open;
+      $(`#${k}-menu`).hidden = !on;
+      $(`#${k}-btn`).setAttribute("aria-expanded", String(on));
+    }
+    if (open) ($(`#${name}-menu [aria-pressed=true]`) || $(`#${name}-menu button`)).focus();
   }
+  const themeMenu = (open) => popMenu("theme", open);
   $("#theme-btn").addEventListener("click", () => themeMenu($("#theme-menu").hidden));
   $("#theme-menu").addEventListener("click", (e) => {
     const b = e.target.closest("[data-t]"); if (!b) return;
@@ -1900,8 +2040,36 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     themeMenu(false); $("#theme-btn").focus();
     applyTheme(true);
   });
-  document.addEventListener("click", (e) => { if (!$("#theme-menu").hidden && !e.target.closest(".theme-pick")) themeMenu(false); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#theme-menu").hidden) { themeMenu(false); $("#theme-btn").focus(); } });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".theme-pick")) popMenu(null, false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    for (const k of ["theme", "lang"]) if (!$(`#${k}-menu`).hidden) { popMenu(k, false); $(`#${k}-btn`).focus(); }
+  });
+
+  // ---------- Changer de langue ----------
+  function applyLang() {
+    for (const k in fmtCache) delete fmtCache[k];
+    translateStatic();
+    $("#lang-label").textContent = lang.toUpperCase();
+    $("#lang-btn").setAttribute("aria-label", tr("Choisir la langue") + " (" + lang.toUpperCase() + ")");
+    document.querySelectorAll("#lang-menu button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.l === lang)));
+    applyTheme(false);
+    paintSync(S.status);
+    paintEye();
+    setType(txType);
+    if (!$("#view-auth").hidden) setAuthMode(authMode);
+    if (!$("#sheet").hidden) setQType(qType);
+    if (!$("#settings").hidden) { renderSetCats(); renderSetRecs(); accountLine(); }
+    if (profile) render();
+  }
+  $("#lang-btn").addEventListener("click", () => popMenu("lang", $("#lang-menu").hidden));
+  $("#lang-menu").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-l]"); if (!b) return;
+    lang = b.dataset.l;
+    try { localStorage.setItem("carnet.lang", lang); } catch {}
+    popMenu(null, false); $("#lang-btn").focus();
+    applyLang();
+  });
   setInterval(() => { if (themeChoice === "auto") applyTheme(true); }, 5 * 60000);
   applyTheme(false);
 
@@ -1936,6 +2104,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   }
 
   setType("depense");
+  applyLang();
   S.ready.then(boot);
 
   // Fonctionnement hors connexion
