@@ -78,7 +78,18 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .sky { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 78%, var(--sky-4) 100%); }
 .sky::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--dusk-1) 0%, var(--dusk-2) 45%, var(--dusk-3) 80%, var(--dusk-4) 100%); opacity: 0; transition: opacity 1.2s ease; }
 body.dusk .sky::after { opacity: 1; }
-.drift { position: absolute; fill: #fff; z-index: 1; aspect-ratio: 200 / 128; height: auto; overflow: visible; }
+/* Lumière : une lueur chaude en haut à droite, une brume claire à l'horizon, un grain de toile peinte */
+.sky-glow, .sky-haze, .sky-grain { position: absolute; inset: 0; pointer-events: none; }
+.sky-glow { z-index: 1; background: radial-gradient(ellipse 70% 55% at 88% -8%, rgba(255, 246, 214, 0.5) 0%, rgba(255, 236, 190, 0.16) 38%, transparent 70%); }
+.sky-haze { z-index: 2; background: linear-gradient(0deg, rgba(240, 248, 255, 0.55) 0%, rgba(240, 248, 255, 0.18) 18%, transparent 38%); }
+body.dusk .sky-haze { background: linear-gradient(0deg, rgba(255, 214, 180, 0.4) 0%, rgba(255, 214, 180, 0.12) 18%, transparent 38%); }
+.sky-grain { z-index: 3; opacity: 0.5; mix-blend-mode: soft-light; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* Nuages de fond en trois plans : les lointains sont petits, pâles, un peu flous et lents */
+.drift { position: absolute; left: 0; fill: url(#driftshade); z-index: 1; aspect-ratio: 200 / 128; height: auto; overflow: visible; will-change: transform; }
+.drift.far { opacity: 0.32; filter: blur(1.6px); }
+.drift.mid { opacity: 0.42; filter: blur(0.6px); }
+.drift.near { opacity: 0.5; }
+.flip { transform: scaleX(-1); transform-origin: center; transform-box: fill-box; }
 .sky svg, .cl > svg, .upcoming svg { overflow: visible; }
 @media (prefers-reduced-motion: no-preference) {
   .drift { animation: drift linear infinite; }
@@ -161,8 +172,8 @@ header .btn { box-shadow: var(--lift-sm); border-color: var(--cloud); }
 .skyfield-head h2 { color: #fff; font-size: 1.9rem; }
 .skyfield-head p { color: #fff; font-weight: 600; font-size: 0.95rem; }
 body.dusk .skyfield-head p { color: #fff; }
-.skysec { display: grid; gap: 10px; min-width: 0; align-content: start; }
-.field-sky { display: grid; gap: 10px; padding-block: 4px 10px; min-height: 120px; }
+.skysec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
+.field-sky { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 4px 10px; min-height: 120px; }
 .sky-row { display: flex; justify-content: center; align-items: flex-start; gap: 8px 14px; }
 /* Un nuage : sa surface est exactement proportionnelle au montant. */
 .cl { position: relative; flex: none; width: var(--w); display: grid; justify-items: center; gap: 4px; color: var(--ink); transform: translateY(var(--dy, 0)); }
@@ -212,15 +223,19 @@ body.dusk .skyfield-head p { color: #fff; }
 
 /* Opérations */
 .tx-list { list-style: none; margin: 0; padding: 0; display: grid; }
-.tx { display: grid; grid-template-columns: 3.3em minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 8px; border-top: 1px solid var(--cloud-2); border-radius: 12px; transition: background-color 0.6s ease; }
-.tx:first-child { border-top-color: transparent; }
+.tx { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; align-items: center; padding: 9px 4px 9px 10px; border-top: 1px solid var(--cloud-2); border-radius: 12px; transition: background-color 0.6s ease; }
+.tx:first-child, .tx-day + .tx { border-top-color: transparent; }
+.tx-day { font-size: 0.8rem; font-weight: 700; color: var(--ink-2); padding: 14px 10px 2px; }
+.tx-day:first-child { padding-top: 2px; }
+.del-ico { width: 36px; height: 36px; padding: 0; display: grid; place-items: center; color: color-mix(in srgb, var(--ink-2) 70%, var(--cloud)); }
+.del-ico svg.i { width: 18px; height: 18px; }
+.del-ico.armed { width: auto; padding: 5px 10px; }
 .tx.fresh { background: color-mix(in srgb, var(--sun) 32%, var(--cloud)); }
-.tx .d { color: var(--ink-2); font-size: 0.85rem; font-weight: 600; }
 .tx .t { min-width: 0; display: grid; gap: 2px; justify-items: start; }
 .tx .t b { font-weight: 700; overflow-wrap: anywhere; }
 .tags { display: flex; gap: 4px; flex-wrap: wrap; }
-.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 0.76rem; padding: 1px 9px; border-radius: 99px; background: var(--cloud-2); color: var(--ink-2); font-weight: 600; }
-.chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--hue, var(--ink-2)); }
+.chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.76rem; padding: 1px 9px; border-radius: 99px; background: var(--cloud-2); color: var(--ink-2); font-weight: 600; }
+.chip i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--hue, var(--ink-2)); }
 .chip.revenu { background: color-mix(in srgb, var(--ok) 14%, var(--cloud)); color: var(--ok); }
 .chip.epargne { background: color-mix(in srgb, var(--sky-2) 14%, var(--cloud)); color: var(--sky-1); }
 .chip.auto { background: transparent; border: 1px solid var(--mist); }
@@ -249,7 +264,8 @@ button.amt:hover { background: var(--cloud-2); }
 
 /* Colline de fin de page */
 .hill { position: relative; margin-top: 40px; margin-inline: -16px; color: #fff; }
-.hill svg { display: block; width: 100%; height: 70px; }
+.hill svg { display: block; width: 100%; height: 84px; }
+.hill .h0 { fill: #8cc7b4; opacity: 0.75; }
 .hill .h1 { fill: var(--hill-2); }
 .hill .h2 { fill: var(--hill); }
 .hill p { background: var(--hill); padding: 6px 16px calc(28px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 0.86rem; font-weight: 600; margin-top: -1px; }
@@ -413,19 +429,30 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
   <symbol id="cloud" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M28 124C12 124 2 112 4 98C6 86 16 78 28 78C26 58 42 44 62 46C70 22 96 10 122 20C140 6 170 14 176 38C192 40 200 54 198 70C204 80 204 100 194 112C188 120 180 124 170 124Z"/></symbol>
+  <!-- Deux autres silhouettes pour que le ciel ne répète pas le même nuage -->
+  <symbol id="cloud-alt" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M22 124C8 124 0 114 3 102C5 91 15 85 27 87C23 69 37 55 55 59C58 37 80 25 100 33C110 9 144 3 160 23C176 15 196 29 192 49C200 58 202 76 195 87C203 97 201 117 187 122C183 124 179 124 174 124Z"/></symbol>
+  <symbol id="cloud-flat" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M16 124C5 124 0 114 6 106C1 96 12 87 25 91C27 77 45 71 57 79C63 63 86 59 98 71C108 55 134 55 142 71C154 61 174 65 176 81C190 79 201 92 196 104C202 114 194 124 182 124Z"/></symbol>
   <defs>
     <linearGradient id="cloudshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.5" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e6f8"/></linearGradient>
+    <linearGradient id="driftshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="#ffffff"/><stop offset="1" stop-color="#e4f0ff" stop-opacity="0.55"/></linearGradient>
     <linearGradient id="stormshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="#d4dcea"/><stop offset="1" stop-color="#a7b4cb"/></linearGradient>
   </defs>
   <symbol id="cloud-cap" viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 40V30C8 18 24 14 38 20 44 4 74 -2 92 12 104 0 140 -4 156 12 168 2 196 2 206 18 220 6 252 6 262 22 276 12 304 12 312 26 326 18 350 18 360 28 374 20 396 24 400 32V40Z"/></symbol>
 </svg>
 
 <div class="sky" aria-hidden="true">
-  <svg class="drift" style="top:9%;width:220px;opacity:.5;animation-duration:190s;animation-delay:-40s"><use href="#cloud"/></svg>
-  <svg class="drift" style="top:34%;width:150px;opacity:.38;animation-duration:150s;animation-delay:-110s"><use href="#cloud"/></svg>
-  <svg class="drift" style="top:58%;width:260px;opacity:.32;animation-duration:230s;animation-delay:-20s"><use href="#cloud"/></svg>
-  <svg class="drift" style="top:80%;width:180px;opacity:.45;animation-duration:170s;animation-delay:-150s"><use href="#cloud"/></svg>
+  <div class="sky-glow"></div>
+  <svg class="drift far" style="top:6%;width:110px;animation-duration:320s;animation-delay:-210s"><use href="#cloud-flat"/></svg>
+  <svg class="drift far" style="top:27%;width:90px;animation-duration:290s;animation-delay:-60s"><use href="#cloud-alt" class="flip"/></svg>
+  <svg class="drift far" style="top:63%;width:130px;animation-duration:340s;animation-delay:-280s"><use href="#cloud-flat" class="flip"/></svg>
+  <svg class="drift mid" style="top:13%;width:200px;animation-duration:210s;animation-delay:-40s"><use href="#cloud"/></svg>
+  <svg class="drift mid" style="top:46%;width:170px;animation-duration:190s;animation-delay:-130s"><use href="#cloud-alt"/></svg>
+  <svg class="drift near" style="top:34%;width:250px;animation-duration:160s;animation-delay:-100s"><use href="#cloud" class="flip"/></svg>
+  <svg class="drift near" style="top:76%;width:290px;animation-duration:150s;animation-delay:-20s"><use href="#cloud-alt"/></svg>
+  <div class="sky-haze"></div>
+  <div class="sky-grain"></div>
 </div>
 
 <div class="wrap">
@@ -586,7 +613,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 
     <div class="hero">
       <section class="rav" aria-labelledby="rav-title">
-        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><path fill="url(#cloudshade)" d="M40 300C14 300 0 282 6 262C-4 244 2 222 16 212C2 196 2 170 18 160C4 144 6 118 22 108C8 92 18 70 44 70C50 40 84 28 108 44C122 14 168 8 190 34C208 6 256 6 272 36C292 18 334 26 340 56C368 52 392 72 384 98C400 112 400 138 384 150C400 164 400 192 384 204C400 220 398 248 382 258C398 280 382 304 356 304C346 326 314 334 296 320C280 340 246 340 230 322C212 340 176 340 160 322C142 338 108 338 94 320C76 334 46 326 40 300Z"/></svg>
+        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><path fill="url(#cloudshade)" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/></svg>
         <div class="rav-body">
           <h2 class="rav-title" id="rav-title">Reste à vivre ce mois</h2>
           <span class="big num" id="rav"></span>
@@ -648,10 +675,11 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 
 <footer class="hill" id="hill" hidden>
   <svg viewBox="0 0 1200 70" preserveAspectRatio="none" aria-hidden="true">
+    <path class="h0" d="M0 70V20C140 2 300 6 420 18S700 -2 900 8S1120 22 1200 6V70Z"/>
     <path class="h1" d="M0 70V34C180 4 360 0 560 22S900 46 1200 14V70Z"/>
     <path class="h2" d="M0 70V52C220 26 420 30 640 46S980 58 1200 38V70Z"/>
   </svg>
-  <p>Tes chiffres restent privés, dans ton compte claude.ai.</p>
+  <p>Tes chiffres restent privés : seul ton compte y a accès.</p>
 </footer>
 
 <!-- Saisie rapide -->
@@ -743,6 +771,14 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const i = Math.max(0, cats.findIndex((c) => c.id === catId));
     return WHEEL[i % WHEEL.length];
   }
+  function dayLabel(iso) {
+    if (iso === todayISO()) return "Aujourd'hui";
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    if (iso === `${y.getFullYear()}-${pad(y.getMonth() + 1)}-${pad(y.getDate())}`) return "Hier";
+    const s = new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  const TRASH = '<svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>';
   const TYPE_LABEL = { depense: "Dépense", revenu: "Revenu", epargne: "Épargne" };
   const ADDED = { depense: "Dépense ajoutée", revenu: "Revenu ajouté", epargne: "Épargne ajoutée" };
 
@@ -1111,9 +1147,11 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const catName = Object.fromEntries(cats.map((c) => [c.id, c.name]));
     const prevEdit = $("#edit-amt") ? $("#edit-amt").value : null;
     rendering = true;
+    let lastDay = null;
     $("#tx-list").innerHTML = t.list.length
       ? t.list.map((x) => {
-          const d = new Date(x.date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+          const head = x.date !== lastDay ? `<li class="tx-day">${esc(dayLabel(x.date))}</li>` : "";
+          lastDay = x.date;
           const chip = x.type === "depense"
             ? `<span class="chip" style="--hue:${hueOf(x.cat)}"><i></i>${esc(catName[x.cat] || "Sans catégorie")}</span>`
             : `<span class="chip ${x.type}">${TYPE_LABEL[x.type]}</span>`;
@@ -1122,10 +1160,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
           const amt = editingId === x.id
             ? `<input type="text" class="amt-input num" id="edit-amt" inputmode="decimal" value="${esc(toInput(x.amount))}" aria-label="Nouveau montant" data-id="${esc(x.id)}">`
             : `<button class="amt num ${x.type}" data-edit="${esc(x.id)}" aria-label="Corriger le montant">${money(sign * x.amount, { sign: true })}</button>`;
-          return `<li class="tx${x.id === freshId ? " fresh" : ""}" data-row="${esc(x.id)}"><span class="d num">${esc(d)}</span>
+          return head + `<li class="tx${x.id === freshId ? " fresh" : ""}" data-row="${esc(x.id)}">
             <span class="t"><b>${esc(title)}</b><span class="tags">${chip}${x.recId ? '<span class="chip auto">auto</span>' : ""}</span></span>
             ${amt}
-            <button class="del" data-id="${esc(x.id)}" aria-label="Supprimer">Suppr.</button></li>`;
+            <button class="del del-ico" data-id="${esc(x.id)}" aria-label="Supprimer">${TRASH}</button></li>`;
         }).join("")
       : `<li class="empty">Aucune opération en ${esc(monthLabel(month))}. Touche « Dépense » pour noter ta première dépense.</li>`;
     rendering = false;
@@ -1176,16 +1214,18 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (n > 1 && lines[n - 1].length === 1 && lines[n - 2].length > 1 && width([lines[n - 2].at(-1), ...lines[n - 1]]) <= W) lines[n - 1].unshift(lines[n - 2].pop());
     const DY = [0, 22, -6, 14, -2, 18];
     let k = 0;
-    field.innerHTML = lines.map((line) => `<div class="sky-row">${line.map((x) => cloudHTML(x, DY[k++ % DY.length])).join("")}</div>`).join("") + (totalBudget ? "" : tipNote());
+    field.innerHTML = lines.map((line) => `<div class="sky-row">${line.map((x) => { const i = k++; return cloudHTML(x, DY[i % DY.length], SHAPES[i % SHAPES.length]); }).join("")}</div>`).join("") + (totalBudget ? "" : tipNote());
     bindTip();
   }
-  function cloudHTML({ c, w, small }, dy) {
+  // Silhouette de chaque nuage, en alternance, pour un ciel moins répétitif
+  const SHAPES = ['<use href="#cloud"/>', '<use href="#cloud-alt" class="flip"/>', '<use href="#cloud" class="flip"/>', '<use href="#cloud-alt"/>'];
+  function cloudHTML({ c, w, small }, dy, use) {
     const over = c.budget && c.spent > c.budget;
     const sub = c.budget ? (over ? `dépassé de ${money(c.spent - c.budget)}` : `sur ${money(c.budget)}`) : "sans budget";
     const bar = c.budget ? `<span class="cl-bar"><i style="width:${Math.min(100, (c.spent / c.budget) * 100)}%"></i></span>` : "";
     const hue = c.id === "_orphan" ? "#6f80a8" : hueOf(c.id);
     const text = `<span class="cl-name"><i></i>${esc(c.name)}</span><b class="num">${money(c.spent)}</b><small>${sub}</small>${bar}`;
-    const shape = `<svg aria-hidden="true" preserveAspectRatio="none"><use href="#cloud"/></svg>`;
+    const shape = `<svg aria-hidden="true" preserveAspectRatio="none">${use}</svg>`;
     return small
       ? `<div class="cl small${over ? " storm" : ""}" style="--w:${w.toFixed(0)}px;--hue:${hue};--dy:${dy}px"><div class="cl-shape">${shape}</div><div class="cl-pill">${text}</div></div>`
       : `<div class="cl${over ? " storm" : ""}" style="--w:${w.toFixed(0)}px;--hue:${hue};--dy:${dy}px"><div class="cl-shape">${shape}<div class="cl-txt">${text}</div></div></div>`;
@@ -1366,9 +1406,9 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (ed) { editingId = ed.dataset.edit; render(); return; }
     const b = e.target.closest(".del"); if (!b) return;
     if (!b.classList.contains("armed")) {
-      document.querySelectorAll(".del.armed").forEach((x) => { x.classList.remove("armed"); x.textContent = "Suppr."; });
+      document.querySelectorAll(".del.armed").forEach((x) => { x.classList.remove("armed"); x.innerHTML = TRASH; });
       b.classList.add("armed"); b.textContent = "Confirmer";
-      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Suppr."; } }, 4000);
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.innerHTML = TRASH; } }, 4000);
       return;
     }
     const x = txs.find((y) => y.id === b.dataset.id);
