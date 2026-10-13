@@ -265,6 +265,7 @@ header .btn { box-shadow: var(--lift-sm); border-color: var(--cloud); }
 .cl-shape { position: relative; width: var(--w); aspect-ratio: 200 / 150; display: grid; filter: drop-shadow(0 12px 12px rgba(13, 40, 90, 0.28)); }
 .cl-shape > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .cl-body { fill: var(--cl-fill, url(#cloudshade)); }
+.cl-shadow { fill: #000; }
 .cl-crease { fill: none; stroke: var(--cl-shade); stroke-opacity: 0.22; stroke-width: 3.5; stroke-linecap: round; }
 .cl.storm { --cl-fill: url(#stormshade); }
 .cl-txt { position: relative; align-self: end; justify-self: center; text-align: center; padding: 0 21% 13%; display: grid; gap: 0; justify-items: center; width: 100%; }
@@ -510,7 +511,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .btn-danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--mist)); }
 .btn-danger.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
 .data-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.top-right { display: flex; gap: 8px; align-items: center; }
+.top-right { display: flex; gap: 8px; align-items: center; margin-left: auto; }
 /* Choix du thème */
 .theme-pick { position: relative; }
 .theme-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 22; width: 16em; display: grid; gap: 2px; padding: 6px; background: var(--cloud); color: var(--ink); border-radius: 18px; box-shadow: var(--lift);
@@ -524,6 +525,45 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .theme-btn > b { font-weight: 800; font-size: 0.86rem; letter-spacing: 0.02em; }
 .lang-menu { width: 11em; }
 .lang-menu button > b:first-child { width: 22px; flex: none; font-size: 0.78rem; font-weight: 800; color: var(--ink-2); }
+/* Bilan annuel */
+.year-top { flex-wrap: wrap; }
+.year-nav { box-shadow: none; background: var(--cloud-2); margin-right: auto; }
+.year-nav strong { min-width: 4.2em; }
+.year-nav .icon-btn[disabled] { opacity: 0.3; cursor: default; background: transparent; }
+.year-figs { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 18px; }
+.year-figs > div { padding-top: 8px; border-top: 1.5px dashed var(--mist); min-width: 0; }
+.year-figs dt { font-size: 0.84rem; font-weight: 600; color: var(--ink-2); }
+.year-figs dd { margin: 0; font-size: 1.3rem; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; }
+.year-figs dd.in { color: var(--ok); }
+.year-figs dd.save { color: var(--sky-1); }
+.year-figs dd.neg { color: var(--bad); }
+.year-block { display: grid; gap: 10px; padding-top: 16px; border-top: 1.5px dashed var(--mist); }
+.year-block h3 { font-size: 1.1rem; }
+.year-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+.year-head p { font-size: 0.84rem; }
+.ychart { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; padding-top: 24px; }
+.ybar { display: grid; grid-template-rows: 150px auto; gap: 6px; justify-items: center; border: 0; background: transparent; padding: 0; color: var(--ink-2); border-radius: 8px; }
+.ybar-plot { position: relative; width: 100%; height: 150px; display: flex; align-items: flex-end; justify-content: center; border-bottom: 1.5px solid var(--mist); }
+.ybar-fill { width: min(72%, 30px); background: var(--sky-2); border-radius: 4px 4px 0 0; min-height: 0; transition: background-color 160ms ease; }
+.ybar.now .ybar-fill { background: var(--sky-1); }
+.ybar:not([disabled]) { cursor: pointer; }
+.ybar[disabled] { cursor: default; }
+.ybar-top { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px; white-space: nowrap; font-size: 0.74rem; font-weight: 700; color: var(--ink); }
+.ybar-m { font-size: 0.76rem; font-weight: 700; text-transform: capitalize; }
+.ybar.now .ybar-m { color: var(--ink); }
+.m-narrow { display: none; }
+@media (hover: hover) and (pointer: fine) { .ybar:not([disabled]):hover .ybar-fill { background: var(--sky-1); } .ybar:not([disabled]):hover .ybar-m { color: var(--ink); } }
+.ytip { position: absolute; top: 0; transform: translate(-50%, -100%); z-index: 3; display: grid; gap: 2px; min-width: 170px; padding: 9px 12px; background: var(--toast-bg); color: var(--toast-ink); border-radius: 12px; font-size: 0.8rem; box-shadow: var(--lift-sm); pointer-events: none; }
+.ytip span { display: flex; justify-content: space-between; gap: 12px; }
+.ycats { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ycat { display: grid; grid-template-columns: minmax(6em, 12em) minmax(0, 1fr) auto 3em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.ycat-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ycat-name i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--hue); margin-right: 6px; }
+.ycat-rail { height: 8px; border-radius: 4px; background: var(--cloud-2); overflow: hidden; }
+.ycat-rail i { display: block; height: 100%; background: var(--hue); border-radius: 4px; }
+.ycat-amt { font-weight: 700; text-align: right; }
+.ycat-pct { color: var(--ink-2); text-align: right; font-size: 0.82rem; }
+.year-facts { font-size: 0.9rem; }
 /* Pages par semaine */
 .week-nav { display: flex; align-items: center; gap: 2px; background: var(--cloud-2); border-radius: 999px; padding: 4px; }
 .week-label { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 0.9rem; padding-inline: 4px; }
@@ -556,11 +596,18 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 @media (max-width: 480px) {
   .syncchip { padding: 13px; }
   #lang-btn svg { display: none; }
+  .year-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .m-long { display: none; }
+  .m-narrow { display: inline; }
+  .ychart { gap: 2px; }
+  .ycat { grid-template-columns: minmax(0, 1fr) auto 2.6em; }
+  .ycat-rail { grid-column: 1 / -1; grid-row: 2; }
   .week-nav { flex-wrap: wrap; border-radius: 22px; }
   .week-label { white-space: nowrap; font-size: 0.86rem; }
   .week-toggle { flex-basis: 100%; text-align: center; margin: 0 0 6px; }
   .week-toggle { margin-inline: 4px 8px; }
-  .syncchip span, .theme-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .year-btn { padding: 9px 11px; }
+  .syncchip span, .theme-btn span, .year-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .theme-btn { padding: 9px 11px; }
   .theme-menu { right: auto; left: 0; transform-origin: top left; }
   .sun-disc { width: 240px; top: -100px; right: -70px; }
@@ -583,6 +630,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-9M20 20v-5M3 20h18"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -597,22 +645,19 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <!-- Deux autres silhouettes pour que le ciel ne répète pas le même nuage -->
   <symbol id="cloud-alt" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M22 124C8 124 0 114 3 102C5 91 15 85 27 87C23 69 37 55 55 59C58 37 80 25 100 33C110 9 144 3 160 23C176 15 196 29 192 49C200 58 202 76 195 87C203 97 201 117 187 122C183 124 179 124 174 124Z"/></symbol>
   <symbol id="cloud-flat" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M16 124C5 124 0 114 6 106C1 96 12 87 25 91C27 77 45 71 57 79C63 63 86 59 98 71C108 55 134 55 142 71C154 61 174 65 176 81C190 79 201 92 196 104C202 114 194 124 182 124Z"/></symbol>
-  <!-- Nuages « réels » : base plate, moutonnements en haut, plis légers ; le filtre puff donne le volume -->
-  <symbol id="cloud-a" viewBox="0 0 200 150"><g filter="url(#puff)"><path class="cl-body" d="M22 144C8 144 2 132 5 120C8 108 18 102 30 104C26 86 38 72 56 74C58 52 78 38 100 44C110 22 142 16 160 34C176 30 192 44 190 62C200 70 202 88 194 98C202 108 202 128 190 138C186 142 182 144 176 144Z"/><path class="cl-crease" filter="url(#soft)" d="M56 77C64 72 75 74 81 83M100 47C112 42 124 48 128 59M160 37C168 43 170 53 166 61M31 107C37 103 45 105 49 111"/></g></symbol>
-  <symbol id="cloud-b" viewBox="0 0 200 150"><g filter="url(#puff)"><path class="cl-body" d="M18 144C6 144 0 132 4 122C8 112 16 108 26 110C20 94 30 80 48 80C46 60 64 46 84 52C92 30 120 22 138 36C150 22 176 26 182 48C196 52 202 70 194 82C202 94 200 114 190 122C196 132 190 144 178 144Z"/><path class="cl-crease" filter="url(#soft)" d="M48 83C56 78 66 80 71 89M84 55C94 50 104 54 109 63M138 39C146 43 150 51 148 59M182 51C186 57 186 65 182 71"/></g></symbol>
+  <!-- Nuages « réels » : base plate, moutonnements en haut, plis légers. Le contour reste vectoriel (net à toute taille) ; seule l'ombre passe par le filtre rim, découpée au contour exact. -->
+  <symbol id="cloud-a" viewBox="0 0 200 150"><path class="cl-body" d="M22 144C8 144 2 132 5 120C8 108 18 102 30 104C26 86 38 72 56 74C58 52 78 38 100 44C110 22 142 16 160 34C176 30 192 44 190 62C200 70 202 88 194 98C202 108 202 128 190 138C186 142 182 144 176 144Z"/><path class="cl-shadow" d="M22 144C8 144 2 132 5 120C8 108 18 102 30 104C26 86 38 72 56 74C58 52 78 38 100 44C110 22 142 16 160 34C176 30 192 44 190 62C200 70 202 88 194 98C202 108 202 128 190 138C186 142 182 144 176 144Z" filter="url(#rim)" clip-path="url(#clip-a)"/><path class="cl-crease" filter="url(#soft)" clip-path="url(#clip-a)" d="M56 77C64 72 75 74 81 83M100 47C112 42 124 48 128 59M160 37C168 43 170 53 166 61M31 107C37 103 45 105 49 111"/></symbol>
+  <clipPath id="clip-a"><path d="M22 144C8 144 2 132 5 120C8 108 18 102 30 104C26 86 38 72 56 74C58 52 78 38 100 44C110 22 142 16 160 34C176 30 192 44 190 62C200 70 202 88 194 98C202 108 202 128 190 138C186 142 182 144 176 144Z"/></clipPath>
+  <symbol id="cloud-b" viewBox="0 0 200 150"><path class="cl-body" d="M18 144C6 144 0 132 4 122C8 112 16 108 26 110C20 94 30 80 48 80C46 60 64 46 84 52C92 30 120 22 138 36C150 22 176 26 182 48C196 52 202 70 194 82C202 94 200 114 190 122C196 132 190 144 178 144Z"/><path class="cl-shadow" d="M18 144C6 144 0 132 4 122C8 112 16 108 26 110C20 94 30 80 48 80C46 60 64 46 84 52C92 30 120 22 138 36C150 22 176 26 182 48C196 52 202 70 194 82C202 94 200 114 190 122C196 132 190 144 178 144Z" filter="url(#rim)" clip-path="url(#clip-b)"/><path class="cl-crease" filter="url(#soft)" clip-path="url(#clip-b)" d="M48 83C56 78 66 80 71 89M84 55C94 50 104 54 109 63M138 39C146 43 150 51 148 59M182 51C186 57 186 65 182 71"/></symbol>
+  <clipPath id="clip-b"><path d="M18 144C6 144 0 132 4 122C8 112 16 108 26 110C20 94 30 80 48 80C46 60 64 46 84 52C92 30 120 22 138 36C150 22 176 26 182 48C196 52 202 70 194 82C202 94 200 114 190 122C196 132 190 144 178 144Z"/></clipPath>
   <defs>
     <!-- Volume : bords légèrement irréguliers et ombre douce le long du bas de chaque moutonnement -->
-    <filter id="puff" x="-6%" y="-10%" width="112%" height="120%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="2" seed="11" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feGaussianBlur in="rough" stdDeviation="0.45" result="body"/>
-      <feOffset in="body" dy="-10" result="up"/>
-      <feComposite in="body" in2="up" operator="out" result="rim"/>
-      <feGaussianBlur in="rim" stdDeviation="5" result="rimSoft"/>
-      <feFlood style="flood-color:var(--cl-shade);flood-opacity:0.55" result="shadeColor"/>
-      <feComposite in="shadeColor" in2="rimSoft" operator="in" result="shade"/>
-      <feComposite in="shade" in2="body" operator="in" result="shadeIn"/>
-      <feMerge><feMergeNode in="body"/><feMergeNode in="shadeIn"/></feMerge>
+    <filter id="rim" x="-5%" y="-10%" width="110%" height="125%" color-interpolation-filters="sRGB">
+      <feOffset in="SourceAlpha" dy="-10" result="up"/>
+      <feComposite in="SourceAlpha" in2="up" operator="out" result="band"/>
+      <feGaussianBlur in="band" stdDeviation="5" result="soft"/>
+      <feFlood style="flood-color:var(--cl-shade);flood-opacity:0.5"/>
+      <feComposite in2="soft" operator="in"/>
     </filter>
     <filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.6"/></filter>
     <!-- Les couleurs des nuages viennent du thème (variables CSS) -->
@@ -736,6 +781,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         <strong id="month-label"></strong>
         <button class="icon-btn" id="next-month" aria-label="Mois suivant"><svg class="i"><use href="#i-right"/></svg></button>
       </div>
+      <button class="btn year-btn" id="toggle-year" type="button" aria-expanded="false" aria-controls="year"><svg class="i"><use href="#i-chart"/></svg><span>Bilan annuel</span></button>
       <div class="top-right">
         <div class="theme-pick">
           <button class="btn theme-btn" id="theme-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu" title="Choisir le thème"><svg class="i"><use href="#i-clock"/></svg><span id="theme-label">Automatique</span></button>
@@ -820,9 +866,32 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       <div class="actions"><button class="btn btn-sun" id="save-settings">Enregistrer les réglages</button></div>
     </section>
 
+    <!-- Bilan annuel -->
+    <section id="year" class="panel year" aria-labelledby="year-title" hidden>
+      <div class="top year-top">
+        <h2 id="year-title">Bilan annuel</h2>
+        <div class="monthnav year-nav">
+          <button class="icon-btn" id="prev-year" type="button" aria-label="Année précédente"><svg class="i"><use href="#i-left"/></svg></button>
+          <strong id="year-label" class="num"></strong>
+          <button class="icon-btn" id="next-year" type="button" aria-label="Année suivante"><svg class="i"><use href="#i-right"/></svg></button>
+        </div>
+        <button class="icon-btn" id="close-year" type="button" aria-label="Fermer"><svg class="i"><use href="#i-close"/></svg></button>
+      </div>
+      <dl class="year-figs" id="year-figs"></dl>
+      <div class="year-block">
+        <div class="year-head"><h3>Dépenses mois par mois</h3><p class="muted">Touche un mois pour l'ouvrir.</p></div>
+        <div class="ychart" id="year-chart"></div>
+      </div>
+      <div class="year-block">
+        <h3>Où est parti l'argent</h3>
+        <ul class="ycats" id="year-cats"></ul>
+      </div>
+      <p class="muted year-facts" id="year-facts"></p>
+    </section>
+
     <div class="hero">
       <section class="rav" aria-labelledby="rav-title">
-        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><path filter="url(#puff)" class="cl-body" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/></svg>
+        <svg class="rav-cloud" viewBox="0 0 400 340" preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id="clip-rav"><path d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/></clipPath></defs><path class="cl-body" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z"/><path class="cl-shadow" d="M50 322C20 324 2 302 12 280C-2 264 0 238 18 226C2 208 6 180 26 168C10 150 18 120 44 112C42 82 70 60 100 66C108 34 140 16 172 28C190 0 240 -4 262 22C284 8 320 16 330 42C358 36 386 58 380 88C400 100 404 128 386 144C402 160 400 188 384 200C398 216 398 246 380 260C396 282 380 314 350 318C338 332 310 336 290 328C262 338 222 338 196 330C168 338 128 338 104 330C84 336 60 334 50 322Z" filter="url(#rim)" clip-path="url(#clip-rav)"/></svg>
         <div class="rav-body">
           <h2 class="rav-title" id="rav-title">Reste à vivre ce mois</h2>
           <span class="big num" id="rav"></span>
@@ -1512,6 +1581,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     watchFresh();
 
     if (!$("#sheet").hidden) renderPills();
+    if (!$("#year").hidden) renderYear();
   }
 
   // Le ciel du mois : un nuage par catégorie dépensée, sa surface exactement proportionnelle au montant.
@@ -1826,6 +1896,97 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (id) await removeTx(id);
   });
 
+  // ---------- Bilan annuel ----------
+  let year = null;
+  function yearData(y) {
+    const months = Array.from({ length: 12 }, (_, i) => ({ ym: `${y}-${pad(i + 1)}`, in: 0, out: 0, save: 0, n: 0 }));
+    const byCat = {};
+    for (const x of live()) {
+      if (!(x.date || "").startsWith(y + "-")) continue;
+      const m = months[+x.date.slice(5, 7) - 1];
+      m.n++;
+      if (x.type === "revenu") m.in += x.amount;
+      else if (x.type === "epargne") m.save += x.amount;
+      else { m.out += x.amount; byCat[x.cat] = (byCat[x.cat] || 0) + x.amount; }
+    }
+    const sum = (k) => months.reduce((a, m) => a + m[k], 0);
+    return { months, byCat, in: sum("in"), out: sum("out"), save: sum("save"), n: sum("n") };
+  }
+  const mName = (ym, o) => new Date(ym + "-15T12:00:00").toLocaleDateString(LOC(), o);
+  function renderYear() {
+    const d = yearData(year);
+    const thisYear = +curMonth().slice(0, 4);
+    $("#year-label").textContent = year;
+    $("#next-year").disabled = year >= thisYear;
+    const rest = d.in - d.out - d.save;
+    const fig = (label, v, cls) => `<div><dt>${tr(label)}</dt><dd class="num${cls ? " " + cls : ""}">${money(v)}</dd></div>`;
+    $("#year-figs").innerHTML = fig("Revenus", d.in, "in") + fig("Dépenses", d.out) + fig("Mis de côté", d.save, "save") + fig("Reste de l'année", rest, rest < 0 ? "neg" : "");
+
+    // Une barre par mois : la hauteur suit les dépenses du mois
+    const max = Math.max(...d.months.map((m) => m.out), 1);
+    const top = d.months.reduce((a, m) => (m.out > a.out ? m : a), d.months[0]);
+    $("#year-chart").innerHTML = d.months.map((m) => {
+      const h = (m.out / max) * 100;
+      const future = m.ym > curMonth();
+      const label = mName(m.ym, { month: "long", year: "numeric" });
+      const aria = tr("{m} : dépenses {a}, revenus {b}, mis de côté {c}", { m: label, a: money(m.out), b: money(m.in), c: money(m.save) });
+      return `<button type="button" class="ybar${m.ym === curMonth() ? " now" : ""}${future ? " future" : ""}" data-ym="${m.ym}" aria-label="${esc(aria)}"${future ? " disabled" : ""}>
+        <span class="ybar-plot">${m.out && m === top ? `<span class="ybar-top num">${esc(money(m.out))}</span>` : ""}<span class="ybar-fill" style="height:${h.toFixed(1)}%"></span></span>
+        <span class="ybar-m"><span class="m-long">${esc(mName(m.ym, { month: "short" }).replace(".", ""))}</span><span class="m-narrow">${esc(mName(m.ym, { month: "narrow" }))}</span></span>
+      </button>`;
+    }).join("") + `<div class="ytip" id="ytip" hidden></div>`;
+
+    // Les catégories de l'année, de la plus coûteuse à la plus légère
+    const cats = profile.categories || [];
+    const known = Object.fromEntries(cats.map((c) => [c.id, nameOf(c.name)]));
+    const rows = Object.entries(d.byCat).sort((a, b) => b[1] - a[1]);
+    const cmax = rows.length ? rows[0][1] : 1;
+    $("#year-cats").innerHTML = rows.length
+      ? rows.map(([id, v]) => `<li class="ycat" style="--hue:${hueOf(id)}"><span class="ycat-name"><i></i>${esc(known[id] || tr("Sans catégorie"))}</span>
+          <span class="ycat-rail"><i style="width:${((v / cmax) * 100).toFixed(1)}%"></i></span>
+          <span class="ycat-amt num">${esc(money(v))}</span><span class="ycat-pct num">${Math.round((v / d.out) * 100)} %</span></li>`).join("")
+      : `<li class="empty">${esc(tr("Aucune dépense en {x}.", { x: year }))}</li>`;
+
+    // En une phrase : le mois le plus dépensier et la moyenne
+    const active = d.months.filter((m) => m.n && m.ym <= curMonth());
+    $("#year-facts").textContent = d.out
+      ? tr("Mois le plus dépensier : {m} ({a}). En moyenne, {b} de dépenses par mois.", { m: mName(top.ym, { month: "long" }), a: money(top.out), b: money(Math.round(d.out / Math.max(1, active.length))) })
+      : "";
+  }
+  function openYear() {
+    year = +month.slice(0, 4);
+    closeSettings();
+    renderYear();
+    $("#year").hidden = false;
+    $("#toggle-year").setAttribute("aria-expanded", "true");
+    $("#year").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function closeYear() { $("#year").hidden = true; $("#toggle-year").setAttribute("aria-expanded", "false"); }
+  $("#toggle-year").addEventListener("click", () => ($("#year").hidden ? openYear() : closeYear()));
+  $("#close-year").addEventListener("click", closeYear);
+  $("#prev-year").addEventListener("click", () => { year--; renderYear(); });
+  $("#next-year").addEventListener("click", () => { year++; renderYear(); });
+  // Toucher un mois l'ouvre ; à la souris, une bulle détaille le mois survolé
+  $("#year-chart").addEventListener("click", (e) => {
+    const b = e.target.closest(".ybar"); if (!b || b.disabled) return;
+    month = b.dataset.ym; txWeek = null; closeYear(); render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  $("#year-chart").addEventListener("pointerover", (e) => {
+    const b = e.target.closest(".ybar"), tip = $("#ytip");
+    if (!b || !tip || e.pointerType !== "mouse") return;
+    const m = yearData(year).months.find((x) => x.ym === b.dataset.ym);
+    tip.innerHTML = `<b>${esc(mName(m.ym, { month: "long", year: "numeric" }))}</b>
+      <span>${esc(tr("Dépenses"))} <b class="num">${esc(money(m.out))}</b></span>
+      <span>${esc(tr("Revenus"))} <b class="num">${esc(money(m.in))}</b></span>
+      <span>${esc(tr("Mis de côté"))} <b class="num">${esc(money(m.save))}</b></span>`;
+    tip.hidden = false;
+    const c = $("#year-chart").getBoundingClientRect(), r = b.getBoundingClientRect();
+    const x = Math.min(Math.max(r.left + r.width / 2 - c.left, 90), c.width - 90);
+    tip.style.left = x + "px";
+  });
+  $("#year-chart").addEventListener("pointerleave", () => { const tip = $("#ytip"); if (tip) tip.hidden = true; });
+
   $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); txWeek = null; render(); });
   $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); txWeek = null; render(); });
 
@@ -1881,6 +2042,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       ? tr("Au {x}. Les opérations à partir de cette date mettent ton solde à jour.", { x: new Date(profile.startDate + "T12:00:00").toLocaleDateString(LOC(), { day: "numeric", month: "long", year: "numeric" }) })
       : "";
     renderSetCats(); renderSetRecs(); accountLine();
+    closeYear();
     $("#settings").hidden = false;
     $("#toggle-settings").setAttribute("aria-expanded", "true");
     $("#settings").scrollIntoView({ behavior: "smooth", block: "start" });

@@ -297,6 +297,17 @@
     ["Opération modifiée.", "Entry updated.", "Movimiento modificado."],
     ["Modifier l'opération", "Edit entry", "Editar el movimiento"],
     ["Confirmer la suppression", "Confirm deletion", "Confirmar la eliminación"],
+    // Bilan annuel
+    ["Bilan annuel", "Year in review", "Resumen anual"],
+    ["Année précédente", "Previous year", "Año anterior"],
+    ["Année suivante", "Next year", "Año siguiente"],
+    ["Reste de l'année", "Left over this year", "Saldo del año"],
+    ["Dépenses mois par mois", "Spending month by month", "Gastos mes a mes"],
+    ["Touche un mois pour l'ouvrir.", "Tap a month to open it.", "Toca un mes para abrirlo."],
+    ["Où est parti l'argent", "Where the money went", "En qué se fue el dinero"],
+    ["Aucune dépense en {x}.", "No spending in {x}.", "Ningún gasto en {x}."],
+    ["{m} : dépenses {a}, revenus {b}, mis de côté {c}", "{m}: spending {a}, income {b}, put aside {c}", "{m}: gastos {a}, ingresos {b}, ahorrado {c}"],
+    ["Mois le plus dépensier : {m} ({a}). En moyenne, {b} de dépenses par mois.", "Biggest spending month: {m} ({a}). On average, {b} spent per month.", "Mes con más gastos: {m} ({a}). De media, {b} de gastos al mes."],
   ];
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
   const en = {}, es = {};
