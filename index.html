@@ -14,6 +14,10 @@
 <meta name="apple-mobile-web-app-title" content="Budget">
 <title>Carnet de budget</title>
 <link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+// Thème posé avant l'affichage : jour, ciel peint ou nuit (automatique = selon l'heure)
+try { var c = localStorage.getItem("carnet.theme") || "auto", h = new Date().getHours(); document.documentElement.dataset.theme = c === "auto" ? (h >= 7 && h < 18 ? "jour" : (h >= 18 && h < 21) || h === 6 ? "peint" : "nuit") : c; } catch (e) { document.documentElement.dataset.theme = "peint"; }
+</script>
 <style>
 /* Police hébergée dans l'appli : aucune requête vers Google (RGPD) */
 @font-face { font-family: "Figtree"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("fonts/figtree-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
@@ -54,10 +58,55 @@ img { max-width: 100%; }
   --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
   --r-lg: 26px;
   --r-md: 16px;
+  /* Ciel (dégradé du fond), texte posé sur le ciel, nuages : changent avec le thème */
+  --sky-top: #1a56c2; --sky-mid: #2a6fd0; --sky-low: #5fa3ea; --sky-hz: #a9d6ff;
+  --on-sky: #fff;
+  --on-sky-shade: 0 1px 2px rgba(10, 30, 70, 0.75), 0 0 10px rgba(10, 30, 70, 0.35);
+  --storm-note: #ffd9d4;
+  --on-sun: #13284f;
+  --toast-bg: #13284f; --toast-ink: #fff;
+  --cs-top: #ffffff; --cs-bot: #d9e6f8;
+  --st-top: #d4dcea; --st-bot: #a7b4cb;
+  --drift-top: #ffffff; --drift-bot: #e4f0ff;
+  --hill-far: #8cc7b4;
+  --bench: #8a5a33; --lamp: #2c3b52; --lamp-light: #dfe9f2;
+}
+/* Jour : ciel clair, soleil, oiseaux. Le texte posé sur le ciel passe à l'encre. */
+:root[data-theme="jour"] {
+  --sky-top: #2b7fdc; --sky-mid: #4f9fea; --sky-low: #8cc8f7; --sky-hz: #d6eeff;
+  --on-sky: #0f2a55;
+  --on-sky-shade: 0 1px 1px rgba(255, 255, 255, 0.7), 0 0 10px rgba(255, 255, 255, 0.6);
+  --storm-note: #a8231a;
+  --hill: #2f8a4c; --hill-2: #5cbf72; --hill-far: #9fd3bd;
+}
+/* Pendant le crépuscule (reste à vivre négatif), le ciel s'assombrit : texte de nouveau blanc */
+:root[data-theme="jour"] body.dusk {
+  --on-sky: #fff;
+  --on-sky-shade: 0 1px 2px rgba(10, 30, 70, 0.75), 0 0 10px rgba(10, 30, 70, 0.35);
+  --storm-note: #ffd9d4;
+}
+/* Nuit : ciel profond, lune, nuages sombres, panneaux de nuit et texte clair */
+:root[data-theme="nuit"] {
+  color-scheme: dark;
+  --sky-top: #060b20; --sky-mid: #0e1838; --sky-low: #1a2754; --sky-hz: #2c3a6c;
+  --cloud: #1a2450; --cloud-2: #252f5e; --mist: #38447a;
+  --ink: #eef3ff; --ink-2: #aab7da;
+  --sky-1: #93bbff; --sky-2: #6a97f0; --sky-3: #4d72c4; --sky-4: #2c3a6c;
+  --ok: #5ad692; --bad: #ff8174; --warn: #ffc266; --storm: #5c6790;
+  --hill: #10261b; --hill-2: #1b3d2b; --hill-far: #253b55;
+  --scrim: rgba(2, 6, 20, 0.62);
+  --lift: 0 18px 40px -18px rgba(0, 0, 0, 0.75);
+  --lift-sm: 0 8px 20px -10px rgba(0, 0, 0, 0.65);
+  --toast-bg: #eef3ff; --toast-ink: #13284f;
+  --cs-top: #36437a; --cs-bot: #222c58;
+  --st-top: #4d4766; --st-bot: #2e2945;
+  --drift-top: #3a4677; --drift-bot: #1c254d;
+  --storm-note: #ffb3aa;
+  --bench: #0b1226; --lamp: #0b1226; --lamp-light: #ffe7a0;
 }
 
 * { box-sizing: border-box; }
-html { background: var(--sky-2); }
+html { background: var(--sky-mid); }
 body {
   background: transparent; color: var(--ink);
   font-family: var(--font-body); font-size: 15px; line-height: 1.5;
@@ -66,7 +115,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh; display: flex; flex-direction: column;
 }
-::selection { background: var(--sun); color: var(--ink); }
+::selection { background: var(--sun); color: var(--on-sun); }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.005em; }
 p { margin: 0; }
 a { color: var(--sky-1); text-underline-offset: 3px; }
@@ -75,7 +124,7 @@ a { color: var(--sky-1); text-underline-offset: 3px; }
 svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
 /* Le ciel */
-.sky { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 78%, var(--sky-4) 100%); }
+.sky { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 38%, var(--sky-low) 78%, var(--sky-hz) 100%); }
 .sky::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--dusk-1) 0%, var(--dusk-2) 45%, var(--dusk-3) 80%, var(--dusk-4) 100%); opacity: 0; transition: opacity 1.2s ease; }
 body.dusk .sky::after { opacity: 1; }
 /* Lumière : une lueur chaude en haut à droite, une brume claire à l'horizon, un grain de toile peinte */
@@ -89,6 +138,47 @@ body.dusk .sky-haze { background: linear-gradient(0deg, rgba(255, 214, 180, 0.4)
 .drift.far { opacity: 0.32; filter: blur(1.6px); }
 .drift.mid { opacity: 0.42; filter: blur(0.6px); }
 .drift.near { opacity: 0.5; }
+/* Décor propre à chaque thème (caché par défaut) */
+.sun-disc, .moon, .stars, .bat, .bird { display: none; position: absolute; pointer-events: none; }
+:root[data-theme="jour"] .sun-disc, :root[data-theme="jour"] .bird,
+:root[data-theme="nuit"] .moon, :root[data-theme="nuit"] .stars, :root[data-theme="nuit"] .bat { display: block; }
+.sun-disc { z-index: 1; top: -120px; right: calc(7% - 100px); width: 320px; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, #fffdf2 0 15%, #ffeaa0 21%, rgba(255, 232, 150, 0.5) 27%, rgba(255, 232, 150, 0.16) 45%, rgba(255, 232, 150, 0) 70%); }
+:root[data-theme="jour"] .sky-glow { background: radial-gradient(ellipse 80% 60% at 92% -6%, rgba(255, 246, 214, 0.55) 0%, rgba(255, 236, 190, 0.16) 40%, transparent 72%); }
+:root[data-theme="jour"] .sky-grain { opacity: 0.3; }
+.bird { z-index: 2; top: 17%; left: 0; width: 26px; aspect-ratio: 36 / 14; fill: none; stroke: #1d3a66; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; overflow: visible; opacity: 0; }
+.bird.w2 { top: 19.5%; width: 20px; }
+.bird.w3 { top: 15.5%; width: 22px; }
+.moon { z-index: 1; top: 7%; right: 9%; width: 84px; filter: drop-shadow(0 0 22px rgba(255, 246, 214, 0.45)); }
+.stars { z-index: 1; top: 0; left: 0; width: 2px; height: 2px; border-radius: 50%; }
+.bat { z-index: 2; top: calc(7% + 28px); right: calc(9% + 24px); width: 40px; aspect-ratio: 2; fill: #070b1c; overflow: visible; opacity: 0; }
+.bat.b2 { width: 28px; top: calc(7% + 50px); }
+:root[data-theme="nuit"] .sky-glow { background: radial-gradient(ellipse 45% 35% at 86% 10%, rgba(170, 190, 255, 0.2), transparent 70%); }
+:root[data-theme="nuit"] .sky-haze { background: linear-gradient(0deg, rgba(255, 170, 100, 0.2) 0%, rgba(255, 170, 100, 0.06) 16%, transparent 34%); }
+:root[data-theme="nuit"] .sky-grain { opacity: 0.35; }
+:root[data-theme="nuit"] body.dusk .sky::after { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .bird { animation: birdfly 46s linear infinite 4s; }
+  .bird.w2 { animation-delay: 4.7s; }
+  .bird.w3 { animation-delay: 5.3s; }
+  .bird use, .bat use { transform-origin: center; transform-box: fill-box; animation: flap 0.26s ease-in-out infinite alternate; }
+  .bat use { animation-duration: 0.16s; }
+  .bat { animation: batfly 27s linear infinite 3s; }
+  .bat.b2 { animation-delay: 3.9s; }
+  .stars.s2 { animation: twinkle 3.6s ease-in-out infinite alternate; }
+  @keyframes birdfly { 0% { transform: translate(-8vw, 0); opacity: 1; } 32% { transform: translate(108vw, -60px); opacity: 1; } 32.1%, 100% { transform: translate(108vw, -60px); opacity: 0; } }
+  @keyframes batfly { 0% { transform: translate(-42vw, 90px) scale(0.8); opacity: 0; } 1% { opacity: 1; } 15% { transform: translate(60px, -60px) scale(1); opacity: 1; } 16%, 100% { transform: translate(60px, -60px); opacity: 0; } }
+  @keyframes flap { to { transform: scaleY(0.35); } }
+  @keyframes twinkle { from { opacity: 1; } to { opacity: 0.35; } }
+}
+/* Fondu entre deux thèmes */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.6s; }
+
+/* Lueur de soleil qui suit la souris (ordinateur) */
+.glow { position: fixed; left: -260px; top: -260px; width: 520px; height: 520px; border-radius: 50%; pointer-events: none; z-index: 14; opacity: 0; transition: opacity 0.4s ease; mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(255, 214, 90, 0.3) 0%, rgba(255, 196, 70, 0.12) 32%, rgba(255, 196, 70, 0) 64%); }
+.glow.on { opacity: 1; }
+:root[data-theme="nuit"] .glow { background: radial-gradient(circle, rgba(255, 210, 120, 0.22) 0%, rgba(255, 190, 90, 0.08) 34%, rgba(255, 190, 90, 0) 64%); }
 .flip { transform: scaleX(-1); transform-origin: center; transform-box: fill-box; }
 .sky svg, .cl > svg, .upcoming svg { overflow: visible; }
 @media (prefers-reduced-motion: no-preference) {
@@ -104,7 +194,7 @@ button { cursor: pointer; }
   padding: 9px 16px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: var(--ink);
 }
 .btn:hover { background: var(--cloud-2); }
-.btn-sun { background: var(--sun); border-color: var(--sun); color: var(--ink); box-shadow: var(--lift-sm); }
+.btn-sun { background: var(--sun); border-color: var(--sun); color: var(--on-sun); box-shadow: var(--lift-sm); }
 .btn-sun:hover { background: var(--sun-deep); border-color: var(--sun-deep); }
 .btn-ghost { border-color: transparent; background: transparent; }
 .btn[disabled] { opacity: 0.55; cursor: default; }
@@ -130,7 +220,7 @@ input:focus, select:focus { border-color: var(--sky-2); outline: none; box-shado
 
 /* En-tête sur le ciel */
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.brand h1 { font-size: 1.7rem; color: #fff; }
+.brand h1 { font-size: 1.7rem; color: var(--on-sky); }
 .monthnav { display: flex; align-items: center; gap: 2px; background: var(--cloud); border-radius: 999px; padding: 4px; box-shadow: var(--lift-sm); }
 .monthnav strong { font-family: var(--font-display); font-weight: 400; font-size: 1.08rem; min-width: 8.6em; text-align: center; text-transform: capitalize; }
 .icon-btn { width: 36px; height: 36px; border-radius: 999px; border: 0; background: transparent; display: grid; place-items: center; padding: 0; color: var(--ink); }
@@ -168,19 +258,17 @@ header .btn { box-shadow: var(--lift-sm); border-color: var(--cloud); }
 .bar.ok > i { background: var(--ok); }
 
 /* Ton ciel du mois */
-.skyfield-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
-.skyfield-head h2 { color: #fff; font-size: 1.9rem; }
-.skyfield-head p { color: #fff; font-weight: 600; font-size: 0.95rem; }
-body.dusk .skyfield-head p { color: #fff; }
+.skyfield-head { text-align: center; }
+.skyfield-head h2 { color: var(--on-sky); font-size: 1.9rem; }
 .skysec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
 .field-sky { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 4px 10px; min-height: 120px; }
 .sky-row { display: flex; justify-content: center; align-items: flex-start; gap: 8px 14px; }
 /* Un nuage : sa surface est exactement proportionnelle au montant. */
-.cl { position: relative; flex: none; width: var(--w); display: grid; justify-items: center; gap: 4px; color: var(--ink); transform: translateY(var(--dy, 0)); }
+.cl { position: relative; flex: none; width: var(--w); display: grid; justify-items: center; gap: 4px; color: var(--ink); margin-top: var(--dy, 0); }
 .cl-shape { position: relative; width: var(--w); aspect-ratio: 200 / 150; display: grid; filter: drop-shadow(0 12px 12px rgba(13, 40, 90, 0.28)); }
 .cl-shape > svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: url(#cloudshade); overflow: visible; }
 .cl.storm .cl-shape > svg { fill: url(#stormshade); }
-.cl-txt { position: relative; align-self: end; justify-self: center; text-align: center; padding: 0 15% 11%; display: grid; gap: 0; justify-items: center; width: 100%; }
+.cl-txt { position: relative; align-self: end; justify-self: center; text-align: center; padding: 0 19% 10%; display: grid; gap: 0; justify-items: center; width: 100%; }
 .cl-name { font-weight: 700; font-size: 0.9rem; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
 .cl-name i, .cl-pill i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--hue); margin-right: 5px; vertical-align: 1px; }
 .cl b { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.15rem, calc(var(--w) / 7), 2rem); line-height: 1.1; }
@@ -190,14 +278,14 @@ body.dusk .skyfield-head p { color: #fff; }
 .cl-bar i { display: block; height: 100%; background: var(--hue); border-radius: inherit; max-width: 100%; }
 /* Petit nuage : le texte passe dessous, en blanc sur le ciel, sans boîte */
 .cl.small { width: max(var(--w), 112px); }
-.cl-pill { text-align: center; display: grid; gap: 0; color: #fff; text-shadow: 0 1px 2px rgba(10, 30, 70, 0.75), 0 0 10px rgba(10, 30, 70, 0.35); max-width: 100%; }
+.cl-pill { text-align: center; display: grid; gap: 0; color: var(--on-sky); text-shadow: var(--on-sky-shade); max-width: 100%; }
 .cl-pill b { font-size: 1.05rem; }
 .cl-pill .cl-name { font-size: 0.8rem; }
-.cl-pill small { color: #fff; }
-.cl.storm .cl-pill small { color: #ffd9d4; font-weight: 700; }
+.cl-pill small { color: var(--on-sky); }
+.cl.storm .cl-pill small { color: var(--storm-note); font-weight: 700; }
 .cl-pill .cl-bar { display: none; }
 .sky-zero { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
-.sky-zero .lbl { color: #fff; font-weight: 600; font-size: 0.84rem; text-shadow: 0 1px 2px rgba(10, 30, 70, 0.6); }
+.sky-zero .lbl { color: var(--on-sky); font-weight: 600; font-size: 0.84rem; text-shadow: var(--on-sky-shade); }
 .sky-zero span:not(.lbl) { background: color-mix(in srgb, var(--cloud) 88%, transparent); color: var(--ink); border-radius: 99px; padding: 4px 11px; font-size: 0.8rem; font-weight: 600; }
 .sky-zero span i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--hue); margin-right: 5px; }
 .sky-note { display: block; width: 100%; text-align: center; }
@@ -223,7 +311,7 @@ body.dusk .skyfield-head p { color: #fff; }
 
 /* Opérations */
 .tx-list { list-style: none; margin: 0; padding: 0; display: grid; }
-.tx { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; align-items: center; padding: 9px 4px 9px 10px; border-top: 1px solid var(--cloud-2); border-radius: 12px; transition: background-color 0.6s ease; }
+.tx { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 2px; align-items: center; padding: 9px 4px 9px 10px; border-top: 1px solid var(--cloud-2); border-radius: 12px; transition: background-color 0.6s ease; }
 .tx:first-child, .tx-day + .tx { border-top-color: transparent; }
 .tx-day { font-size: 0.8rem; font-weight: 700; color: var(--ink-2); padding: 14px 10px 2px; }
 .tx-day:first-child { padding-top: 2px; }
@@ -264,8 +352,17 @@ button.amt:hover { background: var(--cloud-2); }
 
 /* Colline de fin de page */
 .hill { position: relative; margin-top: 40px; margin-inline: -16px; color: #fff; }
-.hill svg { display: block; width: 100%; height: 84px; }
-.hill .h0 { fill: #8cc7b4; opacity: 0.75; }
+.hill .hills { display: block; width: 100%; height: 84px; }
+.hill .h0 { fill: var(--hill-far); opacity: 0.75; }
+.land { position: relative; }
+.bench { position: absolute; left: 7%; bottom: 17px; width: 64px; aspect-ratio: 70 / 34; fill: var(--bench); }
+.lamp { position: absolute; bottom: 19px; width: 22px; aspect-ratio: 30 / 100; overflow: visible; }
+.lamp.l1 { left: calc(7% + 76px); }
+.lamp.l2 { right: 7%; bottom: 30px; }
+.lamp .lamp-body { fill: var(--lamp); }
+.lamp .lamp-light { fill: var(--lamp-light); }
+.lamp .lamp-glow { display: none; }
+:root[data-theme="nuit"] .lamp .lamp-glow { display: inline; }
 .hill .h1 { fill: var(--hill-2); }
 .hill .h2 { fill: var(--hill); }
 .hill p { background: var(--hill); padding: 6px 16px calc(28px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 0.86rem; font-weight: 600; margin-top: -1px; }
@@ -273,17 +370,17 @@ button.amt:hover { background: var(--cloud-2); }
 /* Message bas d'écran */
 .toast {
   position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
-  background: var(--ink); color: #fff; padding: 8px 8px 8px 16px; border-radius: 999px; font-weight: 600;
+  background: var(--toast-bg); color: var(--toast-ink); padding: 8px 8px 8px 16px; border-radius: 999px; font-weight: 600;
   max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 12px; z-index: 25; box-shadow: var(--lift);
 }
-.toast button { border: 0; background: var(--sun); color: var(--ink); font-weight: 800; padding: 6px 14px; border-radius: 999px; }
+.toast button { border: 0; background: var(--sun); color: var(--on-sun); font-weight: 800; padding: 6px 14px; border-radius: 999px; }
 .toast:not(:has(button:not([hidden]))) { padding-right: 18px; }
 
 /* Soleil + panneau de saisie (téléphone) */
 .fab {
   position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 20;
   height: 62px; padding: 0 24px 0 16px; border-radius: 31px; border: 0;
-  background: var(--sun); color: var(--ink); font-weight: 800; font-size: 1.05rem;
+  background: var(--sun); color: var(--on-sun); font-weight: 800; font-size: 1.05rem;
   display: none; align-items: center; gap: 8px; box-shadow: 0 14px 28px -10px rgba(140, 90, 0, 0.6);
 }
 .fab .sunicon { width: 30px; height: 30px; }
@@ -416,9 +513,54 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .btn-danger.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
 .data-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .top-right { display: flex; gap: 8px; align-items: center; }
+/* Choix du thème */
+.theme-pick { position: relative; }
+.theme-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 22; width: 16em; display: grid; gap: 2px; padding: 6px; background: var(--cloud); color: var(--ink); border-radius: 18px; box-shadow: var(--lift);
+  transition: opacity 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); transform-origin: top right; }
+@starting-style { .theme-menu { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+.theme-menu button { display: flex; gap: 12px; align-items: center; text-align: left; border: 0; background: transparent; border-radius: 12px; padding: 8px 10px; color: var(--ink); }
+.theme-menu button:hover { background: var(--cloud-2); }
+.theme-menu button[aria-pressed="true"] { background: var(--cloud-2); box-shadow: inset 0 0 0 1.5px var(--sky-2); }
+.theme-menu b { display: block; font-weight: 700; line-height: 1.25; }
+.theme-menu small { display: block; color: var(--ink-2); font-size: 0.78rem; font-weight: 600; }
+/* Filtre des opérations par catégorie */
+.tx-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.fchip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--mist); background: var(--cloud); color: var(--ink-2); border-radius: 999px; padding: 5px 12px; font-size: 0.82rem; font-weight: 700; transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.fchip i { width: 8px; height: 8px; border-radius: 50%; background: var(--hue); flex: none; }
+.fchip:hover { border-color: var(--hue, var(--sky-2)); }
+.fchip:active { transform: scale(0.97); }
+.fchip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cloud); }
+/* Bouton crayon des opérations */
+.ico-btn { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: transparent; display: grid; place-items: center; color: color-mix(in srgb, var(--ink-2) 70%, var(--cloud)); transition: background-color 160ms ease, color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.ico-btn svg.i { width: 18px; height: 18px; }
+.ico-btn:hover { background: var(--cloud-2); color: var(--ink); }
+.ico-btn:active { transform: scale(0.97); }
+/* Fenêtre « Modifier l'opération » */
+.dlg { border: 0; padding: 0 0 4px; background: transparent; width: min(460px, calc(100% - 32px)); max-height: calc(100% - 24px); overflow: visible; color: var(--ink); }
+.dlg::backdrop { background: var(--scrim); }
+.dlg .panel { margin-top: 36px; }
+.dlg[open] { animation: dlg-in 240ms cubic-bezier(0.23, 1, 0.32, 1); }
+.dlg[open]::backdrop { animation: fade-in 200ms ease; }
+@keyframes dlg-in { from { opacity: 0; transform: translateY(10px) scale(0.97); } }
+@keyframes fade-in { from { opacity: 0; } }
+.edit-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.edit-actions .edit-del { margin-right: auto; color: var(--bad); padding-inline: 10px; }
+.edit-actions .edit-del.armed { background: var(--bad); color: #fff; }
+#edit-hint:empty { display: none; }
 @media (max-width: 480px) {
   .syncchip { padding: 13px; }
-  .syncchip span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .syncchip span, .theme-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .theme-btn { padding: 9px 11px; }
+  .theme-menu { right: auto; left: 0; transform-origin: top left; }
+  .sun-disc { width: 240px; top: -100px; right: -70px; }
+  .moon { width: 62px; right: 7%; top: 5%; }
+  .bat { right: calc(7% + 16px); top: calc(5% + 20px); width: 32px; }
+  .bench { width: 50px; left: 5%; }
+  .lamp.l1 { left: calc(5% + 60px); }
+  .amt { padding-inline: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dlg[open], .dlg[open]::backdrop { animation: none; }
 }
 </style>
 </head>
@@ -429,21 +571,41 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="bat" viewBox="0 0 64 32"><path d="M32 9c-1.6 0-2.6 1.2-3 2.6L27.6 7.4 27 12C22 7 14 5 4 7c4 2 6 5 6 9-3-1-7 0-9 2 6 1 12 3 16 8 2-3 5-5 9-5 1 2 3 3 6 3s5-1 6-3c4 0 7 2 9 5 4-5 10-7 16-8-2-2-6-3-9-2 0-4 2-7 6-9-10-2-18 0-23 5l-.6-4.6-1.4 4.2C34.6 10.2 33.6 9 32 9z"/></symbol>
+  <symbol id="bird" viewBox="0 0 36 14"><path d="M2 11Q9 2 18 9Q27 2 34 11"/></symbol>
+  <symbol id="bench" viewBox="0 0 70 34"><rect x="4" y="2" width="62" height="4" rx="2"/><rect x="4" y="9" width="62" height="4" rx="2"/><rect x="10" y="2" width="3" height="17"/><rect x="57" y="2" width="3" height="17"/><rect x="0" y="17" width="70" height="5" rx="2"/><rect x="8" y="22" width="4" height="12" rx="1"/><rect x="58" y="22" width="4" height="12" rx="1"/></symbol>
+  <symbol id="lamp" viewBox="0 0 30 100"><circle class="lamp-glow" cx="15.5" cy="20" r="15" fill="url(#lampglow)"/><path class="lamp-body" d="M14 26h3v68h-3zM10 94h11a2 2 0 0 1 2 2v4H8v-4a2 2 0 0 1 2-2zM9 10h13l-2 4h-9zM14 6h3v4h-3zM8 14h15l-3 12h-9z"/><path class="lamp-light" d="M10.5 16h10l-2 8h-6z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
   <symbol id="cloud" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M28 124C12 124 2 112 4 98C6 86 16 78 28 78C26 58 42 44 62 46C70 22 96 10 122 20C140 6 170 14 176 38C192 40 200 54 198 70C204 80 204 100 194 112C188 120 180 124 170 124Z"/></symbol>
   <!-- Deux autres silhouettes pour que le ciel ne répète pas le même nuage -->
   <symbol id="cloud-alt" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M22 124C8 124 0 114 3 102C5 91 15 85 27 87C23 69 37 55 55 59C58 37 80 25 100 33C110 9 144 3 160 23C176 15 196 29 192 49C200 58 202 76 195 87C203 97 201 117 187 122C183 124 179 124 174 124Z"/></symbol>
   <symbol id="cloud-flat" viewBox="0 0 200 128" preserveAspectRatio="none"><path d="M16 124C5 124 0 114 6 106C1 96 12 87 25 91C27 77 45 71 57 79C63 63 86 59 98 71C108 55 134 55 142 71C154 61 174 65 176 81C190 79 201 92 196 104C202 114 194 124 182 124Z"/></symbol>
   <defs>
-    <linearGradient id="cloudshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.5" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e6f8"/></linearGradient>
-    <linearGradient id="driftshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="#ffffff"/><stop offset="1" stop-color="#e4f0ff" stop-opacity="0.55"/></linearGradient>
-    <linearGradient id="stormshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="#d4dcea"/><stop offset="1" stop-color="#a7b4cb"/></linearGradient>
+    <!-- Les couleurs des nuages viennent du thème (variables CSS) -->
+    <linearGradient id="cloudshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.5" style="stop-color:var(--cs-top)"/><stop offset="1" style="stop-color:var(--cs-bot)"/></linearGradient>
+    <linearGradient id="driftshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" style="stop-color:var(--drift-top)"/><stop offset="1" style="stop-color:var(--drift-bot);stop-opacity:0.55"/></linearGradient>
+    <linearGradient id="stormshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" style="stop-color:var(--st-top)"/><stop offset="1" style="stop-color:var(--st-bot)"/></linearGradient>
+    <radialGradient id="lampglow"><stop offset="0" stop-color="#ffe7a0" stop-opacity="0.9"/><stop offset="1" stop-color="#ffe7a0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="moonshade" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#fffbea"/><stop offset="1" stop-color="#e4d9bb"/></radialGradient>
   </defs>
   <symbol id="cloud-cap" viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 40V30C8 18 24 14 38 20 44 4 74 -2 92 12 104 0 140 -4 156 12 168 2 196 2 206 18 220 6 252 6 262 22 276 12 304 12 312 26 326 18 350 18 360 28 374 20 396 24 400 32V40Z"/></symbol>
 </svg>
 
 <div class="sky" aria-hidden="true">
   <div class="sky-glow"></div>
+  <div class="sun-disc"></div>
+  <div class="stars" id="stars"></div><div class="stars s2" id="stars2"></div>
+  <svg class="moon" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="url(#moonshade)"/><circle cx="35" cy="40" r="8" fill="#d6cba9" opacity=".55"/><circle cx="62" cy="63" r="11" fill="#d6cba9" opacity=".45"/><circle cx="65" cy="31" r="5" fill="#d6cba9" opacity=".5"/><circle cx="42" cy="70" r="4" fill="#d6cba9" opacity=".45"/></svg>
+  <svg class="bat b1"><use href="#bat"/></svg>
+  <svg class="bat b2"><use href="#bat"/></svg>
+  <svg class="bird w1"><use href="#bird"/></svg>
+  <svg class="bird w2"><use href="#bird"/></svg>
+  <svg class="bird w3"><use href="#bird"/></svg>
   <svg class="drift far" style="top:6%;width:110px;animation-duration:320s;animation-delay:-210s"><use href="#cloud-flat"/></svg>
   <svg class="drift far" style="top:27%;width:90px;animation-duration:290s;animation-delay:-60s"><use href="#cloud-alt" class="flip"/></svg>
   <svg class="drift far" style="top:63%;width:130px;animation-duration:340s;animation-delay:-280s"><use href="#cloud-flat" class="flip"/></svg>
@@ -454,6 +616,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <div class="sky-haze"></div>
   <div class="sky-grain"></div>
 </div>
+<div class="glow" id="glow" aria-hidden="true"></div>
 
 <div class="wrap">
 
@@ -545,6 +708,15 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         <button class="icon-btn" id="next-month" aria-label="Mois suivant"><svg class="i"><use href="#i-right"/></svg></button>
       </div>
       <div class="top-right">
+        <div class="theme-pick">
+          <button class="btn theme-btn" id="theme-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu" title="Choisir le thème"><svg class="i"><use href="#i-clock"/></svg><span id="theme-label">Automatique</span></button>
+          <div class="theme-menu" id="theme-menu" hidden>
+            <button type="button" data-t="auto"><svg class="i"><use href="#i-clock"/></svg><span><b>Automatique</b><small>Change selon l'heure</small></span></button>
+            <button type="button" data-t="jour"><svg class="i"><use href="#i-sun"/></svg><span><b>Jour</b><small>Soleil, oiseaux, ciel clair</small></span></button>
+            <button type="button" data-t="peint"><svg class="i"><use href="#i-cloud"/></svg><span><b>Ciel peint</b><small>Le bleu de Magritte</small></span></button>
+            <button type="button" data-t="nuit"><svg class="i"><use href="#i-moon"/></svg><span><b>Nuit</b><small>Lune et lampadaires</small></span></button>
+          </div>
+        </div>
         <button class="syncchip" id="sync-chip" type="button" title="Synchroniser maintenant"><i></i><span id="sync-label"></span></button>
         <button class="btn" id="toggle-settings" aria-expanded="false">Réglages</button>
       </div>
@@ -632,7 +804,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       <section class="skysec" aria-labelledby="sky-title">
         <div class="skyfield-head">
           <h2 id="sky-title">Ton ciel du mois</h2>
-          <p class="num" id="cat-total"></p>
         </div>
         <div class="field-sky" id="cat-list"></div>
         <div class="sky-zero" id="sky-zero"></div>
@@ -641,13 +812,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 
     <div class="cols">
       <div class="stack">
-        <section class="panel">
-          <div style="display:grid;gap:4px">
-            <h2>Règle 50 / 30 / 20</h2>
-            <p class="muted" style="font-size:0.9rem">Un repère simple : la moitié des revenus pour les besoins, 30 % pour les envies, 20 % pour l'épargne. Le trait marque la cible.</p>
-          </div>
-          <div class="rule" id="rule"></div>
-        </section>
         <section class="panel form-card">
           <h2>Ajouter une opération</h2>
           <form id="tx-form" class="form-grid">
@@ -663,10 +827,18 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
             <div class="full actions"><button class="btn btn-sun" type="submit" id="tx-submit">Ajouter la dépense</button></div>
           </form>
         </section>
+        <section class="panel">
+          <div style="display:grid;gap:4px">
+            <h2>Règle 50 / 30 / 20</h2>
+            <p class="muted" style="font-size:0.9rem">Un repère simple : la moitié des revenus pour les besoins, 30 % pour les envies, 20 % pour l'épargne. Le trait marque la cible.</p>
+          </div>
+          <div class="rule" id="rule"></div>
+        </section>
       </div>
       <section class="panel">
         <div class="top"><h2>Opérations du mois</h2><span class="muted num" id="tx-count"></span></div>
-        <p class="muted" style="font-size:0.85rem" id="tx-help" hidden>Touche un montant pour le corriger.</p>
+        <div class="tx-filter" id="tx-filter" role="group" aria-label="Filtrer par catégorie" hidden></div>
+        <p class="muted" style="font-size:0.85rem" id="tx-help" hidden>Touche le crayon ou le montant pour modifier une opération.</p>
         <ul class="tx-list" id="tx-list"></ul>
       </section>
     </div>
@@ -674,11 +846,16 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 </div>
 
 <footer class="hill" id="hill" hidden>
-  <svg viewBox="0 0 1200 70" preserveAspectRatio="none" aria-hidden="true">
+  <div class="land">
+  <svg class="hills" viewBox="0 0 1200 70" preserveAspectRatio="none" aria-hidden="true">
     <path class="h0" d="M0 70V20C140 2 300 6 420 18S700 -2 900 8S1120 22 1200 6V70Z"/>
     <path class="h1" d="M0 70V34C180 4 360 0 560 22S900 46 1200 14V70Z"/>
     <path class="h2" d="M0 70V52C220 26 420 30 640 46S980 58 1200 38V70Z"/>
   </svg>
+  <svg class="lamp l1" aria-hidden="true"><use href="#lamp"/></svg>
+  <svg class="bench" aria-hidden="true"><use href="#bench"/></svg>
+  <svg class="lamp l2" aria-hidden="true"><use href="#lamp"/></svg>
+  </div>
   <p>Tes chiffres restent privés : seul ton compte y a accès.</p>
 </footer>
 
@@ -717,6 +894,31 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     </div>
   </div>
 </section>
+
+<!-- Modifier une opération -->
+<dialog class="dlg" id="edit-dlg" aria-labelledby="edit-title">
+  <form class="panel capped" id="edit-form" novalidate>
+    <svg class="cap" preserveAspectRatio="none" aria-hidden="true"><use href="#cloud-cap"/></svg>
+    <div class="top"><h2 id="edit-title">Modifier l'opération</h2><button type="button" class="icon-btn" id="edit-close" aria-label="Fermer"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <div class="form-grid">
+      <div class="seg full" role="group" aria-label="Type d'opération" id="edit-seg">
+        <button type="button" data-type="depense" aria-pressed="true">Dépense</button>
+        <button type="button" data-type="revenu" aria-pressed="false">Revenu</button>
+        <button type="button" data-type="epargne" aria-pressed="false">Épargne</button>
+      </div>
+      <label class="field"><span>Montant</span><input type="text" id="edit-amount" inputmode="decimal" autocomplete="off"></label>
+      <label class="field"><span>Date</span><input type="date" id="edit-date"></label>
+      <label class="field full"><span>Libellé</span><input type="text" id="edit-label" maxlength="80" placeholder="facultatif"></label>
+      <label class="field full" id="edit-cat-wrap"><span>Catégorie</span><select id="edit-cat"></select></label>
+      <p class="q-hint err full" id="edit-hint" aria-live="polite"></p>
+      <div class="full edit-actions">
+        <button type="button" class="btn btn-ghost edit-del" id="edit-delete">Supprimer</button>
+        <button type="button" class="btn btn-ghost" id="edit-cancel">Annuler</button>
+        <button type="submit" class="btn btn-sun">Enregistrer</button>
+      </div>
+    </div>
+  </form>
+</dialog>
 
 <div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button id="toast-action" type="button" hidden>Annuler</button></div>
 
@@ -779,6 +981,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   const TRASH = '<svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>';
+  const PEN = '<svg class="i" aria-hidden="true"><use href="#i-pen"/></svg>';
+  // Filtre de la liste : une catégorie de dépense (« c:courses »), les revenus ou l'épargne
+  const groupOf = (x) => x.type === "depense" ? "c:" + (x.cat || "") : x.type;
+  const rankOf = (g, catRank) => g in catRank ? catRank[g] : g === "revenu" ? 900 : g === "epargne" ? 901 : 800;
   const TYPE_LABEL = { depense: "Dépense", revenu: "Revenu", epargne: "Épargne" };
   const ADDED = { depense: "Dépense ajoutée", revenu: "Revenu ajouté", epargne: "Épargne ajoutée" };
 
@@ -786,7 +992,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   let profile = null, profileLoaded = false, txs = [], txsDefinitive = false;
   let month = curMonth();
   let settingsDraft = null, recDraft = null;
-  let editingId = null, rendering = false;
+  let txFilter = "all";
   let freshId = null;
 
   const live = () => txs.filter((x) => !x.skipped);
@@ -1141,15 +1347,24 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (sel.dataset.touched && keep && knownIds.has(keep)) sel.value = keep;
     syncDateDefault();
 
-    // Opérations
-    $("#tx-count").textContent = t.list.length ? `${t.list.length} opération${t.list.length > 1 ? "s" : ""}` : "";
-    $("#tx-help").hidden = !t.list.length;
+    // Opérations, avec un filtre par catégorie
     const catName = Object.fromEntries(cats.map((c) => [c.id, c.name]));
-    const prevEdit = $("#edit-amt") ? $("#edit-amt").value : null;
-    rendering = true;
+    const catRank = Object.fromEntries(cats.map((c, i) => ["c:" + c.id, i]));
+    const groups = [...new Set(t.list.map(groupOf))].sort((a, b) => rankOf(a, catRank) - rankOf(b, catRank));
+    if (!groups.includes(txFilter)) txFilter = "all";
+    const fl = $("#tx-filter");
+    fl.hidden = groups.length < 2;
+    fl.innerHTML = groups.length < 2 ? "" : [["all", "Tout", ""], ...groups.map((g) => g.startsWith("c:")
+        ? [g, catName[g.slice(2)] || "Sans catégorie", hueOf(g.slice(2))]
+        : [g, g === "revenu" ? "Revenus" : "Épargne", g === "revenu" ? "var(--ok)" : "var(--sky-1)"])]
+      .map(([g, name, hue]) => `<button type="button" class="fchip" data-f="${esc(g)}" aria-pressed="${g === txFilter}"${hue ? ` style="--hue:${hue}"` : ""}>${hue ? "<i></i>" : ""}${esc(name)}</button>`).join("");
+    const shown = txFilter === "all" ? t.list : t.list.filter((x) => groupOf(x) === txFilter);
+    const shownSum = shown.reduce((a, x) => a + x.amount, 0);
+    $("#tx-count").textContent = shown.length ? `${shown.length} opération${shown.length > 1 ? "s" : ""}${txFilter !== "all" ? " · " + money(shownSum) : ""}` : "";
+    $("#tx-help").hidden = !t.list.length;
     let lastDay = null;
-    $("#tx-list").innerHTML = t.list.length
-      ? t.list.map((x) => {
+    $("#tx-list").innerHTML = shown.length
+      ? shown.map((x) => {
           const head = x.date !== lastDay ? `<li class="tx-day">${esc(dayLabel(x.date))}</li>` : "";
           lastDay = x.date;
           const chip = x.type === "depense"
@@ -1157,21 +1372,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
             : `<span class="chip ${x.type}">${TYPE_LABEL[x.type]}</span>`;
           const sign = x.type === "revenu" ? 1 : -1;
           const title = x.label || (x.type === "depense" ? catName[x.cat] || "Dépense" : TYPE_LABEL[x.type]);
-          const amt = editingId === x.id
-            ? `<input type="text" class="amt-input num" id="edit-amt" inputmode="decimal" value="${esc(toInput(x.amount))}" aria-label="Nouveau montant" data-id="${esc(x.id)}">`
-            : `<button class="amt num ${x.type}" data-edit="${esc(x.id)}" aria-label="Corriger le montant">${money(sign * x.amount, { sign: true })}</button>`;
           return head + `<li class="tx${x.id === freshId ? " fresh" : ""}" data-row="${esc(x.id)}">
             <span class="t"><b>${esc(title)}</b><span class="tags">${chip}${x.recId ? '<span class="chip auto">auto</span>' : ""}</span></span>
-            ${amt}
-            <button class="del del-ico" data-id="${esc(x.id)}" aria-label="Supprimer">${TRASH}</button></li>`;
+            <button class="amt num ${x.type}" data-edit="${esc(x.id)}" title="Modifier">${money(sign * x.amount, { sign: true })}</button>
+            <button class="ico-btn" data-edit="${esc(x.id)}" aria-label="Modifier « ${esc(title)} »">${PEN}</button>
+            <button class="del del-ico" data-id="${esc(x.id)}" aria-label="Supprimer « ${esc(title)} »">${TRASH}</button></li>`;
         }).join("")
       : `<li class="empty">Aucune opération en ${esc(monthLabel(month))}. Touche « Dépense » pour noter ta première dépense.</li>`;
-    rendering = false;
-    const ei = $("#edit-amt");
-    if (ei) {
-      if (prevEdit !== null) ei.value = prevEdit;
-      ei.focus(); if (prevEdit === null) ei.select();
-    }
     watchFresh();
 
     if (!$("#sheet").hidden) renderPills();
@@ -1181,7 +1388,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   let skyArgs = null;
   function renderSky(t, cats, totalBudget) {
     skyArgs = [t, cats, totalBudget];
-    $("#cat-total").textContent = totalBudget ? `${money(t.out)} dépensés sur ${money(totalBudget)} prévus` : `${money(t.out)} dépensés`;
     const known = new Set(cats.map((c) => c.id));
     const items = cats.map((c) => ({ id: c.id, name: c.name, spent: t.byCat[c.id] || 0, budget: c.budget || 0 }));
     const orphan = Object.keys(t.byCat).filter((id) => !known.has(id)).reduce((a, id) => a + t.byCat[id], 0);
@@ -1400,10 +1606,19 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     try { await addTx({ type: "revenu", amount: profile.salary, date, label: "Salaire" }); } catch (err) { writeError(err); }
   });
 
-  // ---------- Liste : corriger un montant, supprimer ----------
-  $("#tx-list").addEventListener("click", async (e) => {
+  // ---------- Liste : modifier, supprimer, filtrer ----------
+  // Un montant automatique supprimé est seulement masqué, pour qu'il ne revienne pas à la prochaine ouverture.
+  async function removeTx(id) {
+    const x = txs.find((y) => y.id === id);
+    try {
+      if (x && x.recId) await txCol.doc(x.id).update({ skipped: true });
+      else await txCol.doc(id).delete();
+      toast("Opération supprimée.");
+    } catch (err) { writeError(err); }
+  }
+  $("#tx-list").addEventListener("click", (e) => {
     const ed = e.target.closest("[data-edit]");
-    if (ed) { editingId = ed.dataset.edit; render(); return; }
+    if (ed) { openEdit(ed.dataset.edit); return; }
     const b = e.target.closest(".del"); if (!b) return;
     if (!b.classList.contains("armed")) {
       document.querySelectorAll(".del.armed").forEach((x) => { x.classList.remove("armed"); x.innerHTML = TRASH; });
@@ -1411,30 +1626,72 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.innerHTML = TRASH; } }, 4000);
       return;
     }
-    const x = txs.find((y) => y.id === b.dataset.id);
+    removeTx(b.dataset.id);
+  });
+  $("#tx-filter").addEventListener("click", (e) => { const b = e.target.closest(".fchip"); if (b) { txFilter = b.dataset.f; render(); } });
+
+  // ---------- Fenêtre « Modifier l'opération » ----------
+  let editId = null, editType = "depense", editArm = null;
+  function setEditType(type) {
+    editType = type;
+    document.querySelectorAll("#edit-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.type === type)));
+    $("#edit-cat-wrap").hidden = type !== "depense";
+  }
+  function disarmEditDelete() { clearTimeout(editArm); const b = $("#edit-delete"); b.classList.remove("armed"); b.textContent = "Supprimer"; }
+  function openEdit(id) {
+    const x = txs.find((y) => y.id === id); if (!x) return;
+    const cats = profile.categories || [];
+    editId = id;
+    $("#edit-amount").value = toInput(x.amount);
+    $("#edit-date").value = x.date || todayISO();
+    $("#edit-label").value = x.label || "";
+    $("#edit-cat").innerHTML = cats.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+    $("#edit-cat").value = x.cat && cats.some((c) => c.id === x.cat) ? x.cat : (cats[0] || {}).id || "";
+    setEditType(x.type || "depense");
+    $("#edit-hint").textContent = "";
+    disarmEditDelete();
+    $("#edit-dlg").showModal();
+    $("#edit-amount").focus(); $("#edit-amount").select();
+  }
+  const closeEdit = () => { if ($("#edit-dlg").open) $("#edit-dlg").close(); };
+  $("#edit-dlg").addEventListener("close", () => { editId = null; disarmEditDelete(); });
+  // Toucher le voile autour de la fenêtre la ferme
+  $("#edit-dlg").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeEdit(); });
+  $("#edit-close").addEventListener("click", closeEdit);
+  $("#edit-cancel").addEventListener("click", closeEdit);
+  document.querySelectorAll("#edit-seg button").forEach((b) => b.addEventListener("click", () => setEditType(b.dataset.type)));
+  $("#edit-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const x = txs.find((y) => y.id === editId); if (!x) { closeEdit(); return; }
+    const amount = parseAmount($("#edit-amount").value);
+    if (!amount || isNaN(amount)) { $("#edit-hint").textContent = "Indique un montant valide, par exemple 12,50."; $("#edit-amount").focus(); return; }
+    const date = $("#edit-date").value;
+    if (!date) { $("#edit-hint").textContent = "Choisis une date."; $("#edit-date").focus(); return; }
+    const patch = { type: editType, amount, date, label: $("#edit-label").value.trim().slice(0, 80) };
+    if (editType === "depense") patch.cat = $("#edit-cat").value || "autre";
+    const id = editId;
+    closeEdit();
     try {
-      // Un montant automatique supprimé est seulement masqué, pour qu'il ne revienne pas à la prochaine ouverture.
-      if (x && x.recId) await txCol.doc(x.id).update({ skipped: true });
-      else await txCol.doc(b.dataset.id).delete();
-      toast("Opération supprimée.");
+      await txCol.doc(id).update(patch);
+      freshId = id;
+      if (monthOf(date) !== month) month = monthOf(date);
+      render();
+      toast("Opération modifiée.");
     } catch (err) { writeError(err); }
   });
-  async function commitEdit(input) {
-    const id = input.dataset.id; editingId = null;
-    const x = txs.find((y) => y.id === id);
-    const v = parseAmount(input.value);
-    if (!x || !v || isNaN(v) || v === x.amount) { render(); if (v !== null && (isNaN(v) || v === 0)) toast("Montant non valide, rien n'a changé."); return; }
-    try { await txCol.doc(id).update({ amount: v }); toast("Montant corrigé."); } catch (err) { writeError(err); render(); }
-  }
-  $("#tx-list").addEventListener("keydown", (e) => {
-    if (e.target.id !== "edit-amt") return;
-    if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
-    if (e.key === "Escape") { editingId = null; render(); }
+  $("#edit-delete").addEventListener("click", async () => {
+    const b = $("#edit-delete");
+    if (!b.classList.contains("armed")) {
+      b.classList.add("armed"); b.textContent = "Confirmer la suppression";
+      editArm = setTimeout(disarmEditDelete, 4000);
+      return;
+    }
+    const id = editId; closeEdit();
+    if (id) await removeTx(id);
   });
-  $("#tx-list").addEventListener("focusout", (e) => { if (e.target.id === "edit-amt" && editingId && !rendering) commitEdit(e.target); });
 
-  $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); editingId = null; render(); });
-  $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); editingId = null; render(); });
+  $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); render(); });
+  $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); render(); });
 
   // ---------- Bandeau : activer le salaire automatique ----------
   $("#notice-on").addEventListener("click", async () => {
@@ -1610,6 +1867,73 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   });
   $("#toggle-settings").addEventListener("click", () => ($("#settings").hidden ? openSettings() : closeSettings()));
   $("#close-settings").addEventListener("click", closeSettings);
+
+  // ---------- Thèmes : jour, ciel peint, nuit, ou automatique selon l'heure ----------
+  const THEMES = { auto: ["Automatique", "i-clock"], jour: ["Jour", "i-sun"], peint: ["Ciel peint", "i-cloud"], nuit: ["Nuit", "i-moon"] };
+  const THEME_COLOR = { jour: "#2b7fdc", peint: "#1a56c2", nuit: "#070d24" };
+  const autoTheme = () => { const h = new Date().getHours(); return h >= 7 && h < 18 ? "jour" : (h >= 18 && h < 21) || h === 6 ? "peint" : "nuit"; };
+  let themeChoice = "auto";
+  try { themeChoice = localStorage.getItem("carnet.theme") || "auto"; } catch {}
+  if (!THEMES[themeChoice]) themeChoice = "auto";
+  function applyTheme(animate) {
+    const t = themeChoice === "auto" ? autoTheme() : themeChoice;
+    const root = document.documentElement;
+    const go = () => { root.dataset.theme = t; document.querySelector('meta[name="theme-color"]').content = THEME_COLOR[t]; };
+    // Fondu entre deux ciels quand le navigateur sait le faire
+    if (animate && root.dataset.theme !== t && document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(go);
+    else go();
+    $("#theme-btn use").setAttribute("href", "#" + THEMES[themeChoice][1]);
+    $("#theme-label").textContent = THEMES[themeChoice][0];
+    $("#theme-btn").setAttribute("aria-label", "Thème : " + THEMES[themeChoice][0]);
+    document.querySelectorAll("#theme-menu button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === themeChoice)));
+  }
+  function themeMenu(open) {
+    $("#theme-menu").hidden = !open;
+    $("#theme-btn").setAttribute("aria-expanded", String(open));
+    if (open) ($("#theme-menu [aria-pressed=true]") || $("#theme-menu button")).focus();
+  }
+  $("#theme-btn").addEventListener("click", () => themeMenu($("#theme-menu").hidden));
+  $("#theme-menu").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-t]"); if (!b) return;
+    themeChoice = b.dataset.t;
+    try { localStorage.setItem("carnet.theme", themeChoice); } catch {}
+    themeMenu(false); $("#theme-btn").focus();
+    applyTheme(true);
+  });
+  document.addEventListener("click", (e) => { if (!$("#theme-menu").hidden && !e.target.closest(".theme-pick")) themeMenu(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#theme-menu").hidden) { themeMenu(false); $("#theme-btn").focus(); } });
+  setInterval(() => { if (themeChoice === "auto") applyTheme(true); }, 5 * 60000);
+  applyTheme(false);
+
+  // Étoiles de la nuit : deux couches qui scintillent à des rythmes différents
+  (function () {
+    const a = [], b = [];
+    for (let i = 0; i < 80; i++) {
+      const dot = `${(Math.random() * 100).toFixed(2)}vw ${(Math.random() * 70).toFixed(2)}vh 0 ${Math.random() < 0.18 ? "1px" : "0"} rgba(255, 255, 255, ${(0.45 + Math.random() * 0.55).toFixed(2)})`;
+      (i % 2 ? a : b).push(dot);
+    }
+    $("#stars").style.boxShadow = a.join(",");
+    $("#stars2").style.boxShadow = b.join(",");
+  })();
+
+  // Une lueur de soleil suit la souris (ordinateur seulement)
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const g = $("#glow");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+    const step = () => {
+      x += (tx - x) * (still ? 1 : 0.16); y += (ty - y) * (still ? 1 : 0.16);
+      g.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.5 ? requestAnimationFrame(step) : 0;
+    };
+    addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      tx = e.clientX; ty = e.clientY;
+      if (!g.classList.contains("on")) { x = tx; y = ty; g.classList.add("on"); }
+      if (!raf) raf = requestAnimationFrame(step);
+    }, { passive: true });
+    document.documentElement.addEventListener("mouseleave", () => g.classList.remove("on"));
+  }
 
   setType("depense");
   S.ready.then(boot);
