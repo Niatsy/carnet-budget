@@ -99,7 +99,7 @@ button { cursor: pointer; }
 .btn[disabled] { opacity: 0.55; cursor: default; }
 .linkbtn { border: 0; background: none; padding: 4px 0; color: var(--sky-1); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; justify-self: start; }
 
-.field { display: grid; gap: 5px; min-width: 0; }
+.field { display: grid; gap: 5px; min-width: 0; align-content: start; }
 .field > span { font-size: 0.86rem; font-weight: 700; }
 .field small { color: var(--ink-2); font-size: 0.8rem; }
 input[type="text"], input[type="date"], input[type="number"], select {
@@ -493,9 +493,9 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         <input type="text" id="setup-balance" inputmode="decimal" placeholder="ex. 850"></label>
       <label class="field"><span>Épargne déjà de côté</span>
         <input type="text" id="setup-savings" inputmode="decimal" placeholder="ex. 3 000"></label>
-      <label class="field"><span>Objectif d'épargne par mois</span>
-        <input type="text" id="setup-goal" inputmode="decimal" placeholder="20 % du salaire">
-        <small id="setup-goal-hint">Repère courant : 20 % du salaire.</small></label>
+      <label class="field"><span>Objectif d'épargne par mois (montant)</span>
+        <input type="text" id="setup-goal" inputmode="decimal" placeholder="ex. 76">
+        <small id="setup-goal-hint">Un montant par mois. Repère courant : 20&nbsp;% du salaire.</small></label>
       <label class="field"><span>Devise</span>
         <select id="setup-currency">
           <option value="EUR">Euro (€)</option>
@@ -1409,7 +1409,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // ---------- Première ouverture ----------
   $("#setup-salary").addEventListener("input", () => {
     const s = parseAmount($("#setup-salary").value);
-    $("#setup-goal-hint").textContent = s && !isNaN(s) ? `Repère courant : 20 % du salaire, soit ${(Math.round(s * 0.2) / 100).toLocaleString("fr-FR")}.` : "Repère courant : 20 % du salaire.";
+    $("#setup-goal").placeholder = s && !isNaN(s) ? "ex. " + toInput(Math.round(s * 0.2)) : "ex. 76";
+    $("#setup-goal-hint").textContent = s && !isNaN(s) ? `Un montant par mois. Repère courant : 20 % du salaire, soit ${money(Math.round(s * 0.2))}.` : "Un montant par mois. Repère courant : 20 % du salaire.";
   });
   $("#setup-form").addEventListener("submit", async (e) => {
     e.preventDefault();
