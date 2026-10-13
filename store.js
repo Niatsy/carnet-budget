@@ -197,7 +197,9 @@
       claimDevice(j.user.id); keepSession(j); firstPullDone = false; setStatus("idle"); await sync();
     },
     async signUp(email, password) {
-      const j = await auth("signup", { email, password });
+      // Le lien de confirmation reçu par e-mail ramène sur l'appli, qui connecte directement.
+      const back = location.origin + location.pathname;
+      const j = await auth("signup?redirect_to=" + encodeURIComponent(back), { email, password });
       if (j.access_token) { claimDevice(j.user.id); keepSession(j); firstPullDone = false; await sync(); return "ok"; }
       return "confirm";
     },

@@ -878,7 +878,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       if (authMode === "in") { await S.signIn(email, pass); boot(); }
       else if (authMode === "up") {
         const r = await S.signUp(email, pass);
-        if (r === "confirm") { setAuthMode("in", "Compte créé. Ouvre l'e-mail de confirmation : le lien te connectera directement.", true); $("#auth-pass").value = ""; }
+        if (r === "confirm") { setAuthMode("in", "Compte créé ! Ouvre l'e-mail de confirmation et clique sur le lien : il te ramènera ici, déjà connecté.", true); $("#auth-pass").value = ""; $("#auth-pass2").value = ""; }
         else boot();
       } else if (authMode === "forgot") {
         await S.recover(email);
