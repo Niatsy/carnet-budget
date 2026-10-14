@@ -312,6 +312,10 @@
     ["Solde du mois", "Month balance", "Saldo del mes"],
     ["Solde du mois : {x}", "Month balance: {x}", "Saldo del mes: {x}"],
     ["Déjà déduits : {x} de prélèvements prévus d'ici la fin du mois.", "Already deducted: {x} of direct debits due before the end of the month.", "Ya descontados: {x} de cargos previstos antes de fin de mes."],
+    ["Date de ce montant", "Date of this amount", "Fecha de este importe"],
+    ["Les opérations à partir de cette date mettent ton solde à jour.", "Entries from this date onwards update your balance.", "Los movimientos a partir de esta fecha actualizan tu saldo."],
+    ["Encore {x} de prélèvements prévus d'ici la fin du mois.", "{x} of direct debits still due before the end of the month.", "Quedan {x} de cargos previstos antes de fin de mes."],
+    ["Épargne totale", "Total savings", "Ahorro total"],
   ];
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
   const en = {}, es = {};

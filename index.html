@@ -846,7 +846,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       <div class="form-grid">
         <label class="field"><span>Salaire net mensuel</span><input type="text" id="set-salary" inputmode="decimal"><small>Sert de repère pour la règle 50/30/20.</small></label>
         <label class="field"><span>Objectif d'épargne par mois</span><input type="text" id="set-goal" inputmode="decimal"></label>
-        <label class="field"><span>Argent sur ton compte au départ</span><input type="text" id="set-balance" inputmode="decimal"><small id="set-start-hint"></small></label>
+        <label class="field"><span>Argent sur ton compte au départ</span><input type="text" id="set-balance" inputmode="decimal"></label>
+        <label class="field"><span>Date de ce montant</span><input type="date" id="set-start-date"><small>Les opérations à partir de cette date mettent ton solde à jour.</small></label>
         <label class="field"><span>Épargne au départ</span><input type="text" id="set-savings" inputmode="decimal"></label>
         <label class="field"><span>Devise</span>
           <select id="set-currency">
@@ -924,7 +925,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
             <div><dt>Revenus</dt><dd class="num" id="st-in"></dd><small id="st-in-sub"></small></div>
             <div><dt>Dépenses</dt><dd class="num" id="st-out"></dd><small id="st-out-sub"></small></div>
             <div><dt>Mis de côté</dt><dd class="num" id="st-save"></dd><span class="bar" id="st-save-bar"><i></i></span><small id="st-save-sub"></small></div>
-            <div><dt>Sur ton compte</dt><dd class="num" id="st-bal"></dd><small id="st-bal-sub"></small></div>
+            <div><dt>Épargne totale</dt><dd class="num" id="st-bal"></dd></div>
           </dl>
           <p class="upcoming num" id="rav-upcoming" hidden></p>
           <button class="btn btn-sun" id="quick-salary" hidden></button>
@@ -1545,8 +1546,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   const ravOf = (t) => t.in - t.out - t.save;
   // Prélèvements (loyer, abonnements…) encore à venir ce mois-ci ; le salaire à venir n'est pas compté
   const upcomingDebits = () => recOccurrences("upcoming").filter((o) => o.r.type !== "revenu").reduce((a, o) => a + o.r.amount, 0);
-  // Ce qu'on peut encore dépenser : l'argent du compte moins ces prélèvements (le salaire du mois dernier y est déjà)
-  const spendable = () => balances().bal - upcomingDebits();
 
   // ---------- Rendu ----------
   function render() {
@@ -1566,7 +1565,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const upSum = isNow ? upcomingDebits() : 0;
     const monthSolde = ravOf(t);
     // Mois en cours : ce qui reste vraiment ; autre mois : le solde de ce mois-là
-    const rav = isNow ? bal - upSum : monthSolde;
+    const rav = isNow ? bal : monthSolde;
     $("#rav-title").textContent = tr(isNow ? "Reste à vivre ce mois" : "Solde du mois");
     const ravEl = $("#rav");
     ravEl.textContent = money(rav);
@@ -1576,7 +1575,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#rav-sub").textContent = isNow ? tr("Solde du mois : {x}", { x: money(monthSolde, { sign: true }) }) : t.in ? tr("Sur {x} de revenus, après dépenses et épargne.", { x: money(t.in) }) : tr("Aucun revenu enregistré pour ce mois.");
     const up = $("#rav-upcoming");
     up.hidden = !upSum;
-    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>${esc(tr("Déjà déduits : {x} de prélèvements prévus d'ici la fin du mois.", { x: money(upSum) }))}</span>`;
+    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>${esc(tr("Encore {x} de prélèvements prévus d'ici la fin du mois.", { x: money(upSum) }))}</span>`;
     const qs = $("#quick-salary");
     const hasAutoIncome = (recs || []).some((r) => r.type === "revenu");
     const hasSalary = t.list.some((x) => x.type === "revenu" && (x.label || "").toLowerCase() === "salaire");
@@ -1595,8 +1594,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     sb.className = "bar " + (goal && t.save >= goal ? "ok" : "");
     sb.firstElementChild.style.width = gp + "%";
     $("#st-save-sub").textContent = goal ? (t.save >= goal ? tr("Objectif de {x} atteint", { x: money(goal) }) : tr("Encore {x} pour l'objectif", { x: money(goal - t.save) })) : tr("Pas d'objectif défini");
-    $("#st-bal").textContent = money(bal);
-    $("#st-bal-sub").textContent = tr("Épargne totale : {x}", { x: money(sav) });
+    $("#st-bal").textContent = money(sav);
 
     renderSky(t, cats, totalBudget);
 
@@ -1772,7 +1770,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // Pendant la frappe, le reste à vivre baisse en direct.
   function livePreview() {
     if (!profile) return;
-    const base = spendable();
+    const base = balances().bal;
     const a = parseAmount($("#q-amount").value);
     const v = a && !isNaN(a) ? a : 0;
     const after = qType === "revenu" ? base + v : base - v;
@@ -2250,9 +2248,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#set-balance").value = toInput(profile.startBalance);
     $("#set-savings").value = toInput(profile.startSavings);
     $("#set-currency").value = profile.currency || "EUR";
-    $("#set-start-hint").textContent = profile.startDate
-      ? tr("Au {x}. Les opérations à partir de cette date mettent ton solde à jour.", { x: new Date(profile.startDate + "T12:00:00").toLocaleDateString(LOC(), { day: "numeric", month: "long", year: "numeric" }) })
-      : "";
+    $("#set-start-date").value = profile.startDate || "";
     renderSetCats(); renderSetRecs(); accountLine();
     closeYear();
     $("#settings").hidden = false;
@@ -2369,7 +2365,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const btn = $("#save-settings"); btn.disabled = true;
     try {
       for (const k in fmtCache) delete fmtCache[k];
-      await profileRef.update({ ...nums, currency: $("#set-currency").value, categories, recurring });
+      await profileRef.update({ ...nums, startDate: $("#set-start-date").value || profile.startDate || todayISO(), currency: $("#set-currency").value, categories, recurring });
       toast(tr("Réglages enregistrés."));
       closeSettings();
     } catch (err) { writeError(err); }
