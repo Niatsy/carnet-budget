@@ -308,6 +308,7 @@
     ["Aucune dépense en {x}.", "No spending in {x}.", "Ningún gasto en {x}."],
     ["{m} : dépenses {a}, revenus {b}, mis de côté {c}", "{m}: spending {a}, income {b}, put aside {c}", "{m}: gastos {a}, ingresos {b}, ahorrado {c}"],
     ["Mois le plus dépensier : {m} ({a}). En moyenne, {b} de dépenses par mois.", "Biggest spending month: {m} ({a}). On average, {b} spent per month.", "Mes con más gastos: {m} ({a}). De media, {b} de gastos al mes."],
+    ["Changer de mois", "Change month", "Cambiar de mes"],
   ];
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
   const en = {}, es = {};

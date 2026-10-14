@@ -385,14 +385,11 @@ button.amt:hover { background: var(--cloud-2); }
 }
 .fab .sunicon { width: 30px; height: 30px; }
 .fab:active { transform: scale(0.96); }
-.sheet-backdrop { position: fixed; inset: 0; background: var(--scrim); z-index: 30; opacity: 0; transition: opacity 0.2s ease; }
-.sheet-backdrop.open { opacity: 1; }
+.sheet-backdrop { position: fixed; inset: 0; background: var(--scrim); z-index: 30; opacity: 0; }
 .sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 92%;
   padding-top: 34px; transform: translateY(105%);
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.sheet.open { transform: translateY(0); }
 .sheet .cap { bottom: auto; top: 0; height: 36px; }
 .sheet .sheet-body { margin-top: -2px; }
 .sheet-body { background: var(--cloud); overflow-y: auto; overscroll-behavior: contain; max-height: calc(100% - 34px); padding-inline: 16px; padding-block: 0 calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--lift); margin-top: -1px; }
@@ -432,7 +429,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .rav .big { letter-spacing: -0.03em; }
 
 /* Retour à l'appui, survols réservés à la souris */
-.btn, .icon-btn, .amt, .del, .seg button, .pill, .fab, .linkbtn, .toast button { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, border-color 160ms ease; }
+.btn, .icon-btn, .amt, .del, .seg button, .pill, .fab, .linkbtn, .toast button, .ybar, .ico-btn { transition: transform 100ms ease-out, background-color 160ms ease, border-color 160ms ease; }
+.ybar:not([disabled]):active, .ico-btn:active, .pill:active, .fab:active { transform: scale(0.96); }
 .btn:active, .icon-btn:active, .amt:active, .del:active, .seg button:active, .toast button:active { transform: scale(0.97); }
 @media not all and (hover: hover) and (pointer: fine) {
   .btn:hover { background: var(--cloud); }
@@ -442,10 +440,38 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   .pill:hover { border-color: var(--mist); }
 }
 /* Panneau : entrée souple, sortie plus rapide */
-.sheet { transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1); }
-.sheet:not(.open) { transition-duration: 200ms; }
+/* Le panneau de saisie est animé par un ressort en JavaScript (il peut être attrapé à tout moment) */
+.sheet { will-change: transform; }
+.grab { position: absolute; top: 12px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: var(--mist); z-index: 2; }
+[data-drag] { touch-action: none; cursor: grab; }
+.sheet .top[data-drag] button { cursor: pointer; }
+.tx-list { touch-action: pan-y; will-change: transform; }
+.panel:has(> .tx-list) { overflow-x: clip; } /* la semaine qui glisse ne sort pas du panneau */
+/* Barre de mois flottante : verre dépoli, le contenu défile dessous */
+.floatnav { position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: 50%; z-index: 18; display: flex; align-items: center; gap: 2px; padding: 4px;
+  border-radius: 999px; background: color-mix(in srgb, var(--cloud) 62%, transparent); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid color-mix(in srgb, #fff 45%, transparent); box-shadow: var(--lift-sm); color: var(--ink);
+  opacity: 0; visibility: hidden; transform: translate(-50%, -10px) scale(0.96); filter: blur(4px);
+  transition: opacity 200ms ease, filter 200ms ease, transform var(--spring-dur, 320ms) var(--spring, ease-out), visibility 0s 200ms; }
+.floatnav.on { opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1); filter: none; transition: opacity 200ms ease, filter 200ms ease, transform var(--spring-dur, 320ms) var(--spring, ease-out), visibility 0s; }
+.floatnav strong { font-weight: 700; font-size: 0.98rem; min-width: 8.6em; text-align: center; }
+:root[data-theme="nuit"] .floatnav { border-color: color-mix(in srgb, #fff 14%, transparent); }
+/* Menus de thème et de langue : même matière de verre */
+.theme-menu { background: color-mix(in srgb, var(--cloud) 80%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border: 1px solid color-mix(in srgb, #fff 50%, transparent); }
+:root[data-theme="nuit"] .theme-menu { border-color: color-mix(in srgb, #fff 14%, transparent); }
+/* Typographie : le suivi des lettres dépend de la taille */
+.chip, .tx-day, .fchip, .ybar-m, small { letter-spacing: 0.01em; }
+/* Moins de transparence demandée : surfaces pleines */
+@media (prefers-reduced-transparency: reduce) {
+  .floatnav, .theme-menu { background: var(--cloud); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Plus de contraste demandé : bords nets et textes plus foncés */
+@media (prefers-contrast: more) {
+  .panel, .floatnav, .theme-menu, .pill, .fchip { border: 1.5px solid var(--ink-2); }
+  .muted, .figs dt, .year-figs dt, .tx-day { color: var(--ink); }
+}
 /* Message : glisse depuis le bas */
-.toast { transition: transform 260ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease; }
+.toast { transition: transform var(--spring-dur, 260ms) var(--spring, cubic-bezier(0.23, 1, 0.32, 1)), opacity 200ms ease; }
 @starting-style { .toast { opacity: 0; transform: translate(-50%, 16px); } }
 
 @media (max-width: 860px) {
@@ -477,7 +503,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   .bar > i, .rule-bar > i, .cl-bar i { transition: width 0.4s ease; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sheet, .sheet-backdrop, .sky::after, .tx { transition: none; }
+  .sky::after, .tx { transition: none; }
   .nudge { animation: none; }
 }
 /* Spécifique à l'application */
@@ -516,7 +542,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .theme-pick { position: relative; }
 .theme-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 22; width: 16em; display: grid; gap: 2px; padding: 6px; background: var(--cloud); color: var(--ink); border-radius: 18px; box-shadow: var(--lift);
   transition: opacity 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); transform-origin: top right; }
-@starting-style { .theme-menu { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+
 .theme-menu button { display: flex; gap: 12px; align-items: center; text-align: left; border: 0; background: transparent; border-radius: 12px; padding: 8px 10px; color: var(--ink); }
 .theme-menu button:hover { background: var(--cloud-2); }
 .theme-menu button[aria-pressed="true"] { background: var(--cloud-2); box-shadow: inset 0 0 0 1.5px var(--sky-2); }
@@ -585,9 +611,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 .dlg { border: 0; padding: 0 0 4px; background: transparent; width: min(460px, calc(100% - 32px)); max-height: calc(100% - 24px); overflow: visible; color: var(--ink); }
 .dlg::backdrop { background: var(--scrim); }
 .dlg .panel { margin-top: 36px; }
-.dlg[open] { animation: dlg-in 240ms cubic-bezier(0.23, 1, 0.32, 1); }
+
 .dlg[open]::backdrop { animation: fade-in 200ms ease; }
-@keyframes dlg-in { from { opacity: 0; transform: translateY(10px) scale(0.97); } }
 @keyframes fade-in { from { opacity: 0; } }
 .edit-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .edit-actions .edit-del { margin-right: auto; color: var(--bad); padding-inline: 10px; }
@@ -968,6 +993,13 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   <p>Tes chiffres restent privés : seul ton compte y a accès.</p>
 </footer>
 
+<!-- Barre de mois flottante -->
+<nav class="floatnav" id="floatnav" aria-label="Changer de mois" inert>
+  <button class="icon-btn" type="button" data-go="-1" aria-label="Mois précédent"><svg class="i"><use href="#i-left"/></svg></button>
+  <strong id="float-month"></strong>
+  <button class="icon-btn" type="button" data-go="1" aria-label="Mois suivant"><svg class="i"><use href="#i-right"/></svg></button>
+</nav>
+
 <!-- Saisie rapide -->
 <button class="fab" id="fab" hidden>
   <svg class="sunicon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="7" fill="#fff6d6" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6 6l2.8 2.8M23.2 23.2 26 26M6 26l2.8-2.8M23.2 8.8 26 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 12.5v7M12.5 16h7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
@@ -975,10 +1007,11 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 </button>
 <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
 <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
-  <svg class="cap" preserveAspectRatio="none" aria-hidden="true"><use href="#cloud-cap"/></svg>
+  <svg class="cap" data-drag preserveAspectRatio="none" aria-hidden="true"><use href="#cloud-cap"/></svg>
+  <div class="grab" data-drag aria-hidden="true"></div>
   <div class="sheet-body">
     <div class="sheet-inner">
-      <div class="top">
+      <div class="top" data-drag>
         <h2 id="sheet-title">Nouvelle dépense</h2>
         <button class="icon-btn" id="sheet-close" aria-label="Fermer"><svg class="i"><use href="#i-close"/></svg></button>
       </div>
@@ -1037,6 +1070,55 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 <script>
 (function () {
   const $ = (s) => document.querySelector(s);
+  // ---------- Mouvement : des ressorts, comme sur iPhone ----------
+  // Un ressort se règle par son amortissement (1 = sans rebond) et sa réponse (vitesse, en secondes).
+  // Il part toujours de la position affichée et garde la vitesse du doigt : on peut le rattraper à tout moment.
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)");
+  function spring({ from, to, velocity = 0, damping = 1, response = 0.35, onUpdate, onDone }) {
+    if (REDUCED.matches) { onUpdate(to); if (onDone) onDone(); return () => {}; }
+    const k = (2 * Math.PI / response) ** 2, c = (4 * Math.PI * damping) / response;
+    let x = from, v = velocity, last = performance.now(), raf = 0;
+    const step = (now) => {
+      const dt = Math.min(0.064, (now - last) / 1000); last = now;
+      const n = Math.max(1, Math.ceil(dt / 0.004)), h = dt / n;
+      for (let i = 0; i < n; i++) { const a = -k * (x - to) - c * v; v += a * h; x += v * h; }
+      if (Math.abs(x - to) < 0.4 && Math.abs(v) < 8) { onUpdate(to); if (onDone) onDone(); return; }
+      onUpdate(x); raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }
+  // Où le geste « veut » aller : la projection de l'élan (même formule que le défilement d'Apple)
+  const project = (v, d = 0.998) => ((v / 1000) * d) / (1 - d);
+  // Résistance progressive au-delà d'une limite
+  const rubber = (over, dim, c = 0.55) => (over * dim * c) / (dim + c * Math.abs(over));
+  // Vitesse du doigt (px/s) d'après ses 100 dernières millisecondes
+  const velocityOf = (hist) => { const a = hist[0], b = hist[hist.length - 1]; const dt = (b.t - a.t) / 1000; return dt > 0 ? (b.v - a.v) / dt : 0; };
+  const track = (hist, t, v) => { hist.push({ t, v }); while (hist.length > 2 && t - hist[0].t > 100) hist.shift(); };
+  // Le même ressort, échantillonné en courbe CSS linear(), pour les transitions simples (menus, messages, fenêtres)
+  const SPRING = (function () {
+    const fallback = { ease: "cubic-bezier(0.23, 1, 0.32, 1)", dur: 320 };
+    if (!(window.CSS && CSS.supports("transition-timing-function", "linear(0, 1)"))) return fallback;
+    const response = 0.36, k = (2 * Math.PI / response) ** 2, c = (4 * Math.PI) / response, h = 1 / 600;
+    let x = 0, v = 0, t = 0; const pts = [];
+    while (t < 2) { pts.push(x); const a = k * (1 - x) - c * v; v += a * h; x += v * h; t += h; if (1 - x < 0.001) break; }
+    pts.push(1);
+    const n = 36, out = [];
+    for (let i = 0; i <= n; i++) out.push(pts[Math.round((i / n) * (pts.length - 1))].toFixed(3));
+    return { ease: `linear(${out.join(", ")})`, dur: Math.round(t * 1000) };
+  })();
+  document.documentElement.style.setProperty("--spring", SPRING.ease);
+  document.documentElement.style.setProperty("--spring-dur", SPRING.dur + "ms");
+  // Apparition « matérielle » : l'élément arrive net en partant d'un léger flou, depuis son point d'origine
+  function materialize(el, from = "scale(0.94)") {
+    if (REDUCED.matches) return el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150 });
+    return el.animate([{ opacity: 0, transform: from, filter: "blur(6px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: SPRING.dur, easing: SPRING.ease });
+  }
+  // Petite vibration au moment exact où une saisie est enregistrée (téléphones qui le permettent)
+  const buzz = () => { try { if (navigator.vibrate) navigator.vibrate(8); } catch {} };
+  // Sur iPhone, l'état « appuyé » ne s'affiche qu'avec un écouteur tactile : retour visuel dès le contact
+  document.addEventListener("touchstart", () => {}, { passive: true });
+
   // ---------- Langue : français, anglais, espagnol ----------
   const LOCALES = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
   let lang = "fr";
@@ -1474,6 +1556,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const recs = profile.recurring;
 
     $("#month-label").textContent = monthLabel(month);
+    $("#float-month").textContent = monthLabel(month);
     $("#rec-notice").hidden = recs !== undefined;
 
     const rav = ravOf(t);
@@ -1714,6 +1797,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     if (!vv) return;
     s.style.bottom = Math.max(0, window.innerHeight - vv.height - vv.offsetTop) + "px";
     s.style.maxHeight = Math.round(vv.height * 0.92) + "px";
+    if (!s.hidden) sheetH = s.offsetHeight;
   }
   function openSheet() {
     $("#q-amount").value = ""; $("#q-label").value = ""; $("#q-date").value = todayISO();
@@ -1721,21 +1805,60 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#q-cur").textContent = curSymbol();
     setQType("depense"); renderPills();
     const s = $("#sheet"), b = $("#sheet-backdrop");
+    const wasHidden = s.hidden;
     s.hidden = false; b.hidden = false;
     $("#q-amount").focus({ preventScroll: true });
     syncViewport();
-    requestAnimationFrame(() => { s.classList.add("open"); b.classList.add("open"); });
+    sheetH = s.offsetHeight;
+    if (wasHidden) paintSheet(sheetH);
+    sheetOpen = true;
+    moveSheet(0, 0, 1);
   }
-  function closeSheet() {
+  // Fermeture : continue à la vitesse du doigt s'il y en a une
+  function closeSheet(velocity) {
     const s = $("#sheet"), b = $("#sheet-backdrop");
-    if (s.hidden) return;
-    s.classList.remove("open"); b.classList.remove("open");
+    if (s.hidden || !sheetOpen) return;
+    sheetOpen = false;
     $("#q-amount").blur();
-    const done = () => { s.hidden = true; b.hidden = true; };
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) done(); else setTimeout(done, 210);
+    moveSheet(sheetH + 24, typeof velocity === "number" ? velocity : 0, 1, () => { s.hidden = true; b.hidden = true; });
     $("#fab").focus({ preventScroll: true });
     render();
   }
+  let sheetY = 0, sheetH = 0, sheetOpen = false, sheetStop = null, sheetDrag = null;
+  function paintSheet(y) {
+    sheetY = y;
+    $("#sheet").style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+    $("#sheet-backdrop").style.opacity = String(Math.max(0, Math.min(1, 1 - y / (sheetH || 1))));
+  }
+  function moveSheet(to, velocity, damping, done) {
+    if (sheetStop) sheetStop();
+    sheetStop = spring({ from: sheetY, to, velocity, damping, response: 0.32, onUpdate: paintSheet, onDone: done });
+  }
+  // Attraper le panneau par le haut : il suit le doigt, résiste vers le haut, et se ferme si on le lance vers le bas
+  $("#sheet").addEventListener("pointerdown", (e) => {
+    const zone = e.target.closest("[data-drag]");
+    if (!zone || e.target.closest("button") || !sheetOpen) return;
+    if (sheetStop) sheetStop();
+    sheetDrag = { id: e.pointerId, y0: e.clientY, start: sheetY, hist: [] };
+    track(sheetDrag.hist, e.timeStamp, e.clientY);
+    zone.setPointerCapture(e.pointerId);
+  });
+  $("#sheet").addEventListener("pointermove", (e) => {
+    if (!sheetDrag || e.pointerId !== sheetDrag.id) return;
+    let y = sheetDrag.start + (e.clientY - sheetDrag.y0);
+    if (y < 0) y = -rubber(-y, sheetH);
+    paintSheet(y);
+    track(sheetDrag.hist, e.timeStamp, e.clientY);
+  });
+  const endSheetDrag = (e) => {
+    if (!sheetDrag || e.pointerId !== sheetDrag.id) return;
+    const v = velocityOf(sheetDrag.hist);
+    sheetDrag = null;
+    if (sheetY + project(v) > sheetH * 0.45) closeSheet(v);
+    else moveSheet(0, v, Math.abs(v) > 300 ? 0.8 : 1);
+  };
+  $("#sheet").addEventListener("pointerup", endSheetDrag);
+  $("#sheet").addEventListener("pointercancel", endSheetDrag);
   function readQuickAmount() {
     const a = parseAmount($("#q-amount").value);
     if (!a || isNaN(a)) {
@@ -1751,7 +1874,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const doc = { type: qType, amount, date: $("#q-date").value || todayISO(), label: $("#q-label").value.trim().slice(0, 80) };
     if (qType === "depense") doc.cat = cat;
     closeSheet();
-    try { await addTx(doc); } catch (err) { writeError(err); }
+    try { await addTx(doc); buzz(); } catch (err) { writeError(err); }
   }
   $("#fab").addEventListener("click", openSheet);
   $("#sheet-close").addEventListener("click", closeSheet);
@@ -1815,6 +1938,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     try {
       if (x && x.recId) await txCol.doc(x.id).update({ skipped: true });
       else await txCol.doc(id).delete();
+      buzz();
       toast(tr("Opération supprimée."));
     } catch (err) { writeError(err); }
   }
@@ -1833,6 +1957,54 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   $("#week-prev").addEventListener("click", () => { const w = monthWeeks(month), i = w.indexOf(txWeek); if (i > 0) { txWeek = w[i - 1]; render(); } });
   $("#week-next").addEventListener("click", () => { const w = monthWeeks(month), i = w.indexOf(txWeek); if (i < w.length - 1) { txWeek = w[i + 1]; render(); } });
   $("#week-toggle").addEventListener("click", () => { weekMode = !weekMode; render(); });
+  // Balayer la liste vers la gauche ou la droite change de semaine ; au bout du mois, elle résiste.
+  (function () {
+    const list = $("#tx-list");
+    let g = null, stop = null, swallow = false, x = 0, W = 1;
+    const paint = (v) => { x = v; list.style.transform = v ? `translate3d(${v.toFixed(1)}px, 0, 0)` : ""; list.style.opacity = String(1 - Math.min(0.6, (Math.abs(v) / W) * 0.6)); };
+    const neighbours = () => { const w = monthWeeks(month), i = w.indexOf(txWeek); return { w, i, prev: i > 0, next: i < w.length - 1 }; };
+    list.addEventListener("pointerdown", (e) => {
+      if (!weekMode || e.button > 0 || $("#week-nav").hidden) return;
+      if (stop) stop();
+      W = list.offsetWidth || 1;
+      g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, start: x, active: false, hist: [] };
+      track(g.hist, e.timeStamp, e.clientX);
+    });
+    list.addEventListener("pointermove", (e) => {
+      if (!g || e.pointerId !== g.id) return;
+      const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+      if (!g.active) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        if (Math.abs(dy) > Math.abs(dx)) { g = null; return; } // geste vertical : on laisse défiler la page
+        g.active = true; list.setPointerCapture(e.pointerId);
+      }
+      const nb = neighbours();
+      let v = g.start + dx;
+      if ((v > 0 && !nb.prev) || (v < 0 && !nb.next)) v = rubber(v, W);
+      paint(v);
+      track(g.hist, e.timeStamp, e.clientX);
+    });
+    const end = (e) => {
+      if (!g || e.pointerId !== g.id) return;
+      const was = g; g = null;
+      if (!was.active) return;
+      swallow = true; setTimeout(() => (swallow = false), 0);
+      const v = velocityOf(was.hist), nb = neighbours();
+      const aim = x + project(v, 0.99);
+      const dir = aim < -W * 0.25 && nb.next ? 1 : aim > W * 0.25 && nb.prev ? -1 : 0;
+      if (!dir) { stop = spring({ from: x, to: 0, velocity: v, damping: Math.abs(v) > 300 ? 0.8 : 1, response: 0.3, onUpdate: paint }); return; }
+      // La semaine part du côté du geste, la suivante arrive de l'autre côté
+      stop = spring({ from: x, to: -dir * W, velocity: v, response: 0.22, onUpdate: paint, onDone: () => {
+        txWeek = nb.w[nb.i + dir]; render();
+        paint(dir * W * 0.5);
+        stop = spring({ from: x, to: 0, velocity: v * 0.5, response: 0.3, onUpdate: paint });
+      } });
+    };
+    list.addEventListener("pointerup", end);
+    list.addEventListener("pointercancel", end);
+    // Un glissement n'est pas un appui : on ne déclenche pas « Modifier » ou « Supprimer » à la fin d'un balayage
+    list.addEventListener("click", (e) => { if (swallow) { e.stopPropagation(); e.preventDefault(); } }, true);
+  })();
   $("#tx-filter").addEventListener("click", (e) => { const b = e.target.closest(".fchip"); if (b) { txFilter = b.dataset.f; render(); } });
 
   // ---------- Fenêtre « Modifier l'opération » ----------
@@ -1856,9 +2028,31 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#edit-hint").textContent = "";
     disarmEditDelete();
     $("#edit-dlg").showModal();
+    editFrom = editOrigin(id);
+    materialize($("#edit-form"), editFrom);
     $("#edit-amount").focus(); $("#edit-amount").select();
   }
-  const closeEdit = () => { if ($("#edit-dlg").open) $("#edit-dlg").close(); };
+  // Le point de départ de la fenêtre : la ligne de l'opération, pour qu'on voie d'où elle vient
+  let editFrom = "scale(0.94)", editClosing = false;
+  function editOrigin(id) {
+    const row = document.querySelector(`[data-row="${CSS.escape(id)}"]`), f = $("#edit-form");
+    if (!row) { f.style.transformOrigin = ""; return "scale(0.94)"; }
+    const rr = row.getBoundingClientRect(), fr = f.getBoundingClientRect();
+    const oy = Math.max(0, Math.min(fr.height, rr.top + rr.height / 2 - fr.top));
+    f.style.transformOrigin = `50% ${oy}px`;
+    return `translateY(${((rr.top + rr.height / 2 - (fr.top + oy)) * 0.35).toFixed(0)}px) scale(0.9)`;
+  }
+  // Fermeture par le même chemin, en sens inverse
+  function closeEdit() {
+    const d = $("#edit-dlg");
+    if (!d.open || editClosing) return;
+    editClosing = true;
+    const a = REDUCED.matches
+      ? $("#edit-form").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" })
+      : $("#edit-form").animate([{ opacity: 1, transform: "none", filter: "blur(0)" }, { opacity: 0, transform: editFrom, filter: "blur(4px)" }], { duration: 180, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
+    a.onfinish = () => { a.cancel(); editClosing = false; d.close(); };
+  }
+  $("#edit-dlg").addEventListener("cancel", (e) => { e.preventDefault(); closeEdit(); });
   $("#edit-dlg").addEventListener("close", () => { editId = null; disarmEditDelete(); });
   // Toucher le voile autour de la fenêtre la ferme
   $("#edit-dlg").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeEdit(); });
@@ -1986,6 +2180,18 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     tip.style.left = x + "px";
   });
   $("#year-chart").addEventListener("pointerleave", () => { const tip = $("#ytip"); if (tip) tip.hidden = true; });
+
+  // Quand l'en-tête sort de l'écran, une barre de mois en verre dépoli prend le relais en haut
+  (function () {
+    const nav = $("#floatnav");
+    nav.addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b) $(b.dataset.go === "1" ? "#next-month" : "#prev-month").click(); });
+    if (!("IntersectionObserver" in window)) return;
+    new IntersectionObserver(([en]) => {
+      const on = !en.isIntersecting && !$("#view-app").hidden;
+      nav.classList.toggle("on", on);
+      nav.inert = !on;
+    }, { rootMargin: "-8px 0px 0px 0px" }).observe($("header.top"));
+  })();
 
   $("#prev-month").addEventListener("click", () => { month = shiftMonth(month, -1); txWeek = null; render(); });
   $("#next-month").addEventListener("click", () => { month = shiftMonth(month, 1); txWeek = null; render(); });
@@ -2191,7 +2397,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
       $(`#${k}-menu`).hidden = !on;
       $(`#${k}-btn`).setAttribute("aria-expanded", String(on));
     }
-    if (open) ($(`#${name}-menu [aria-pressed=true]`) || $(`#${name}-menu button`)).focus();
+    if (open) { materialize($(`#${name}-menu`), "translateY(-6px) scale(0.94)"); ($(`#${name}-menu [aria-pressed=true]`) || $(`#${name}-menu button`)).focus(); }
   }
   const themeMenu = (open) => popMenu("theme", open);
   $("#theme-btn").addEventListener("click", () => themeMenu($("#theme-menu").hidden));
