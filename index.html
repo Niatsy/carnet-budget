@@ -486,7 +486,6 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
 @media (max-width: 480px) {
   .form-grid { grid-template-columns: minmax(0, 1fr); }
   .rav { padding: 88px 9% 50px; }
-  .rav .sub { display: none; }
   .figs small { display: none; }
   .figs dd { font-size: 1.12rem; }
   .upcoming { padding: 7px 12px; }
@@ -1544,6 +1543,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     return cats.map((c, i) => ({ c, i, n: n[c.id] || 0 })).sort((a, b) => b.n - a.n || a.i - b.i).map((o) => o.c);
   }
   const ravOf = (t) => t.in - t.out - t.save;
+  // Prélèvements (loyer, abonnements…) encore à venir ce mois-ci ; le salaire à venir n'est pas compté
+  const upcomingDebits = () => recOccurrences("upcoming").filter((o) => o.r.type !== "revenu").reduce((a, o) => a + o.r.amount, 0);
+  // Ce qu'on peut encore dépenser : l'argent du compte moins ces prélèvements (le salaire du mois dernier y est déjà)
+  const spendable = () => balances().bal - upcomingDebits();
 
   // ---------- Rendu ----------
   function render() {
@@ -1559,18 +1562,21 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#float-month").textContent = monthLabel(month);
     $("#rec-notice").hidden = recs !== undefined;
 
-    const rav = ravOf(t);
+    const isNow = month === curMonth();
+    const upSum = isNow ? upcomingDebits() : 0;
+    const monthSolde = ravOf(t);
+    // Mois en cours : ce qui reste vraiment ; autre mois : le solde de ce mois-là
+    const rav = isNow ? bal - upSum : monthSolde;
+    $("#rav-title").textContent = tr(isNow ? "Reste à vivre ce mois" : "Solde du mois");
     const ravEl = $("#rav");
     ravEl.textContent = money(rav);
     ravEl.classList.toggle("neg", rav < 0);
     ravEl.classList.remove("preview");
-    document.body.classList.toggle("dusk", rav < 0 && t.in > 0);
-    $("#rav-sub").textContent = t.in ? tr("Sur {x} de revenus, après dépenses et épargne.", { x: money(t.in) }) : tr("Aucun revenu enregistré pour ce mois.");
-    const upcoming = month === curMonth() ? recOccurrences("upcoming").filter((o) => o.r.type !== "revenu") : [];
-    const upSum = upcoming.reduce((a, o) => a + o.r.amount, 0);
+    document.body.classList.toggle("dusk", rav < 0 && (isNow || t.in > 0));
+    $("#rav-sub").textContent = isNow ? tr("Solde du mois : {x}", { x: money(monthSolde, { sign: true }) }) : t.in ? tr("Sur {x} de revenus, après dépenses et épargne.", { x: money(t.in) }) : tr("Aucun revenu enregistré pour ce mois.");
     const up = $("#rav-upcoming");
     up.hidden = !upSum;
-    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>${esc(tr("Encore {a} de prélèvements prévus : {b} vraiment disponibles.", { a: money(upSum), b: money(rav - upSum) }))}</span>`;
+    if (upSum) up.innerHTML = `<svg aria-hidden="true"><use href="#cloud"/></svg><span>${esc(tr("Déjà déduits : {x} de prélèvements prévus d'ici la fin du mois.", { x: money(upSum) }))}</span>`;
     const qs = $("#quick-salary");
     const hasAutoIncome = (recs || []).some((r) => r.type === "revenu");
     const hasSalary = t.list.some((x) => x.type === "revenu" && (x.label || "").toLowerCase() === "salaire");
@@ -1766,7 +1772,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // Pendant la frappe, le reste à vivre baisse en direct.
   function livePreview() {
     if (!profile) return;
-    const base = ravOf(monthTotals(curMonth()));
+    const base = spendable();
     const a = parseAmount($("#q-amount").value);
     const v = a && !isNaN(a) ? a : 0;
     const after = qType === "revenu" ? base + v : base - v;

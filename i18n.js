@@ -309,6 +309,9 @@
     ["{m} : dépenses {a}, revenus {b}, mis de côté {c}", "{m}: spending {a}, income {b}, put aside {c}", "{m}: gastos {a}, ingresos {b}, ahorrado {c}"],
     ["Mois le plus dépensier : {m} ({a}). En moyenne, {b} de dépenses par mois.", "Biggest spending month: {m} ({a}). On average, {b} spent per month.", "Mes con más gastos: {m} ({a}). De media, {b} de gastos al mes."],
     ["Changer de mois", "Change month", "Cambiar de mes"],
+    ["Solde du mois", "Month balance", "Saldo del mes"],
+    ["Solde du mois : {x}", "Month balance: {x}", "Saldo del mes: {x}"],
+    ["Déjà déduits : {x} de prélèvements prévus d'ici la fin du mois.", "Already deducted: {x} of direct debits due before the end of the month.", "Ya descontados: {x} de cargos previstos antes de fin de mes."],
   ];
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
   const en = {}, es = {};
