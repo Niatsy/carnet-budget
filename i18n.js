@@ -316,6 +316,7 @@
     ["Les opérations à partir de cette date mettent ton solde à jour.", "Entries from this date onwards update your balance.", "Los movimientos a partir de esta fecha actualizan tu saldo."],
     ["Encore {x} de prélèvements prévus d'ici la fin du mois.", "{x} of direct debits still due before the end of the month.", "Quedan {x} de cargos previstos antes de fin de mes."],
     ["Épargne totale", "Total savings", "Ahorro total"],
+    ["Carte à débit différé : mes achats du mois ne sortent de mon compte qu’à la fin du mois. Le reste à vivre devient : argent sur ton compte + revenus du mois − dépenses du mois. Recopie le montant de ta banque au début de chaque mois.", "Deferred debit card: my card purchases only leave my account at the end of the month. Left to spend becomes: money in your account + this month’s income − this month’s spending. Copy the amount from your bank at the start of each month.", "Tarjeta de débito diferido: mis compras del mes solo salen de mi cuenta a final de mes. El disponible pasa a ser: dinero en tu cuenta + ingresos del mes − gastos del mes. Copia el importe de tu banco al principio de cada mes."],
   ];
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
   const en = {}, es = {};

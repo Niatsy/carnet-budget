@@ -1,6 +1,6 @@
 // Garde l'appli sur l'appareil pour qu'elle s'ouvre sans réseau.
 // Change VERSION à chaque mise à jour de l'appli pour que les appareils récupèrent la nouvelle.
-const VERSION = "carnet-v13";
+const VERSION = "carnet-v14";
 const SHELL = [
   "./", "index.html", "confidentialite.html", "config.js", "i18n.js", "store.js", "manifest.webmanifest",
   "fonts/figtree-latin.woff2", "fonts/figtree-latin-ext.woff2",

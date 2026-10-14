@@ -847,7 +847,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
         <label class="field"><span>Salaire net mensuel</span><input type="text" id="set-salary" inputmode="decimal"><small>Sert de repère pour la règle 50/30/20.</small></label>
         <label class="field"><span>Objectif d'épargne par mois</span><input type="text" id="set-goal" inputmode="decimal"></label>
         <label class="field"><span>Argent sur ton compte au départ</span><input type="text" id="set-balance" inputmode="decimal"></label>
-        <label class="field"><span>Date de ce montant</span><input type="date" id="set-start-date"><small>Les opérations à partir de cette date mettent ton solde à jour.</small></label>
+        <label class="field" id="set-start-date-wrap"><span>Date de ce montant</span><input type="date" id="set-start-date"><small>Les opérations à partir de cette date mettent ton solde à jour.</small></label>
+        <label class="full consent"><input type="checkbox" id="set-deferred"> <span>Carte à débit différé : mes achats du mois ne sortent de mon compte qu’à la fin du mois. Le reste à vivre devient : argent sur ton compte + revenus du mois − dépenses du mois. Recopie le montant de ta banque au début de chaque mois.</span></label>
         <label class="field"><span>Épargne au départ</span><input type="text" id="set-savings" inputmode="decimal"></label>
         <label class="field"><span>Devise</span>
           <select id="set-currency">
@@ -1544,6 +1545,9 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     return cats.map((c, i) => ({ c, i, n: n[c.id] || 0 })).sort((a, b) => b.n - a.n || a.i - b.i).map((o) => o.c);
   }
   const ravOf = (t) => t.in - t.out - t.save;
+  // Reste à vivre du mois en cours. Carte à débit différé : les achats du mois ne sont pas encore sortis du compte,
+  // donc solde bancaire recopié + revenus − dépenses − épargne du mois. Sinon : le compte suivi depuis la date de départ.
+  const leftNow = (t) => (profile.deferred ? (profile.startBalance || 0) + ravOf(t) : balances().bal);
   // Prélèvements (loyer, abonnements…) encore à venir ce mois-ci ; le salaire à venir n'est pas compté
   const upcomingDebits = () => recOccurrences("upcoming").filter((o) => o.r.type !== "revenu").reduce((a, o) => a + o.r.amount, 0);
 
@@ -1565,7 +1569,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const upSum = isNow ? upcomingDebits() : 0;
     const monthSolde = ravOf(t);
     // Mois en cours : ce qui reste vraiment ; autre mois : le solde de ce mois-là
-    const rav = isNow ? bal : monthSolde;
+    const rav = isNow ? leftNow(t) : monthSolde;
     $("#rav-title").textContent = tr(isNow ? "Reste à vivre ce mois" : "Solde du mois");
     const ravEl = $("#rav");
     ravEl.textContent = money(rav);
@@ -1770,7 +1774,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
   // Pendant la frappe, le reste à vivre baisse en direct.
   function livePreview() {
     if (!profile) return;
-    const base = balances().bal;
+    const base = leftNow(monthTotals(curMonth()));
     const a = parseAmount($("#q-amount").value);
     const v = a && !isNaN(a) ? a : 0;
     const after = qType === "revenu" ? base + v : base - v;
@@ -2249,6 +2253,8 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     $("#set-savings").value = toInput(profile.startSavings);
     $("#set-currency").value = profile.currency || "EUR";
     $("#set-start-date").value = profile.startDate || "";
+    $("#set-deferred").checked = !!profile.deferred;
+    $("#set-start-date-wrap").hidden = !!profile.deferred;
     renderSetCats(); renderSetRecs(); accountLine();
     closeYear();
     $("#settings").hidden = false;
@@ -2365,12 +2371,14 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.015em; }
     const btn = $("#save-settings"); btn.disabled = true;
     try {
       for (const k in fmtCache) delete fmtCache[k];
-      await profileRef.update({ ...nums, startDate: $("#set-start-date").value || profile.startDate || todayISO(), currency: $("#set-currency").value, categories, recurring });
+      await profileRef.update({ ...nums, startDate: $("#set-start-date").value || profile.startDate || todayISO(), deferred: $("#set-deferred").checked, currency: $("#set-currency").value, categories, recurring });
       toast(tr("Réglages enregistrés."));
       closeSettings();
     } catch (err) { writeError(err); }
     btn.disabled = false;
   });
+  // En débit différé, la date du montant ne sert pas : on la cache
+  $("#set-deferred").addEventListener("change", (e) => { $("#set-start-date-wrap").hidden = e.target.checked; });
   $("#toggle-settings").addEventListener("click", () => ($("#settings").hidden ? openSettings() : closeSettings()));
   $("#close-settings").addEventListener("click", closeSettings);
 
